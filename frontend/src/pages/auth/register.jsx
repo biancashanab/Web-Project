@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { registerUser } from "../../store/auth"; 
-import { Toaster } from "../../components/ui/sonner";  // Importă Toaster corect
+import { toast } from "sonner";  
 import CommonForm from "../../components/common/form";
 
 const initialState = {
@@ -17,21 +17,18 @@ function AuthRegister()
   const [formData, setFormData] = useState(initialState);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { toast } = Toaster();
 
   function onSubmit(event) {
     event.preventDefault();
-    dispatch(registerUser(formData)).then((data) => {
-      if (data?.payload?.success) {
-        toast({
-          title: data?.payload?.message,
-        });
+    dispatch(registerUser(formData)).then((data) => 
+    {
+      if (data?.payload?.success) 
+      {
+        toast(data?.payload?.message);
         navigate("/auth/login");
-      } else {
-        toast({
-          title: data?.payload?.message,
-          variant: "destructive",
-        });
+      } 
+      else {
+        toast.error(data?.payload?.message || "Registration failed");
       }
     });
   }
@@ -63,6 +60,6 @@ function AuthRegister()
       />
     </div>
   );
-  }
+}
 
 export default AuthRegister;

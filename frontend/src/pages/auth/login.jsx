@@ -1,7 +1,7 @@
 import CommonForm from "../../components/common/form";
-import { toast } from "sonner"; // 
+import { toast } from "sonner";
 import { loginFormControls } from "../../config";
-import { loginUser } from "../../store/auth";
+import { loginUser, startTransition } from "../../store/auth";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
@@ -20,14 +20,14 @@ function AuthLogin()
   {
     event.preventDefault();
 
-    dispatch(loginUser(formData)).then((data) => 
-    {
+    dispatch(loginUser(formData)).then((data) => {
       if (data?.payload?.success) 
       {
-        toast({title: data?.payload?.message,});
+        toast.success(data?.payload?.message);
+        dispatch(startTransition());
       } 
       else {
-        toast({title: data?.payload?.message,variant: "destructive", });
+        toast.error(data?.payload?.message || "Login failed");
       }
     });
   }

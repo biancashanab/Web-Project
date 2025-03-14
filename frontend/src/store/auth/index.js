@@ -1,46 +1,96 @@
-import {createSlice, createAsyncThunk  } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const initialState = {
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: false,
+  isTransitioning: false, // New state for transitions between pages after auth actions
   user: null,
 };
 
-export const registerUser = createAsyncThunk("/auth/register",
-
+export const registerUser = createAsyncThunk(
+  "/auth/register",
   async (formData) => {
-    const response = await axios.post( "http://localhost:8080/api/auth/register", formData, { withCredentials: true, });
+    const response = await axios.post(
+      "http://localhost:8080/api/auth/register",
+      formData,
+      { withCredentials: true }
+    );
     return response.data;
   }
 );
 
-export const loginUser = createAsyncThunk("/auth/login",
-
+export const loginUser = createAsyncThunk(
+  "/auth/login",
   async (formData) => {
-    const response = await axios.post("http://localhost:8080/api/auth/login", formData, { withCredentials: true, });
+    const response = await axios.post(
+      "http://localhost:8080/api/auth/login",
+      formData,
+      { withCredentials: true }
+    );
     return response.data;
   }
 );
 
-export const logoutUser = createAsyncThunk("/auth/logout",
-
+export const logoutUser = createAsyncThunk(
+  "/auth/logout",
   async () => {
     const response = await axios.post(
-      "http://localhost:8080/api/auth/logout", {}, { withCredentials: true, });
+      "http://localhost:8080/api/auth/logout",
+      {},
+      { withCredentials: true }
+    );
     return response.data;
   }
 );
 
+export const checkAuth = createAsyncThunk(
+  "/auth/check-auth",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/auth/check-auth",
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { success: false });
+    }
+  }
+);
+
+// Helper action to set the transitioning state
+export const setTransitioning = (isTransitioning) => ({
+  type: 'auth/setTransitioningState',
+  payload: isTransitioning
+});
+
 const authSlice = createSlice({
-    name: "auth",
-    initialState,
-    reducers: { setUser: (state, action) => {}, },
-   extraReducers: (builder) => {
+  name: "auth",
+  initialState,
+  reducers: {
+    setUser: (state, action) => {
+      state.user = action.payload;
+    },
+    setTransitioningState: (state, action) => {
+      state.isTransitioning = action.payload;
+    },
+    startTransition: (state) => {
+      state.isTransitioning = true;
+    },
+    endTransition: (state) => {
+      state.isTransitioning = false;
+    }
+  },
+  extraReducers: (builder) => {
     builder
-      .addCase(registerUser.pending, (state) => { state.isLoading = true; })
+      // Register
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.isTransitioning = true; // Start transition after successful registration
         state.user = null;
         state.isAuthenticated = false;
       })
@@ -49,21 +99,53 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
       })
-      .addCase(loginUser.pending, (state) => { state.isLoading = true; })
+      
+      // Login
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log(action);
-
         state.isLoading = false;
         state.user = action.payload.success ? action.payload.user : null;
         state.isAuthenticated = action.payload.success;
+        state.isTransitioning = action.payload.success; // Start transition if login was successful
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
+      })
+      
+      // Logout
+      .addCase(logoutUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isTransitioning = true; // Start transition after logout
+        state.user = null;
+        state.isAuthenticated = false;
+      })
+      .addCase(logoutUser.rejected, (state) => {
+        state.isLoading = false;
+      })
+      
+      // Check Auth
+      .addCase(checkAuth.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(checkAuth.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.success ? action.payload.user : null;
+        state.isAuthenticated = action.payload.success;
+      })
+      .addCase(checkAuth.rejected, (state) => {
+        state.isLoading = false;
+        state.user = null;
+        state.isAuthenticated = false;
       });
-    },
-  });
-  
-  export const { setUser } = authSlice.actions;
-  export default authSlice.reducer;
+  },
+});
+
+export const { setUser, startTransition, endTransition } = authSlice.actions;
+export default authSlice.reducer;

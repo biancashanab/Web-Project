@@ -1,13 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import express from "express";
 import User from "../../models/User.js";
 
-const router = express.Router();
-
-
 //register
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   const { userName, email, password } = req.body;
 
   try {
@@ -30,7 +26,7 @@ const registerUser = async (req, res) => {
 };
 
 //login
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try 
@@ -50,7 +46,7 @@ const loginUser = async (req, res) => {
                               userName: checkUser.userName,
       },
       "CLIENT_SECRET_KEY",
-      { expiresIn: "60m" }
+      { expiresIn: "1m" }  //trebuie sa modific in mai putin de 10 minut
     );
 
     res.cookie("token", token, { httpOnly: true, secure: false }).json({ success: true, message: "Logged in successfully",
@@ -69,12 +65,12 @@ const loginUser = async (req, res) => {
 };
 
 //logout
-const logoutUser = (req, res) => {
+export const logoutUser = (req, res) => {
   res.clearCookie("token").json({ success: true, message: "Logged out successfully!", });
 };
 
 //auth middleware
-const authMiddleware = async (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
   const token = req.cookies.token;
   if (!token)
     return res.status(401).json({ success: false, message: "Unauthorised user!", });
@@ -88,6 +84,3 @@ const authMiddleware = async (req, res, next) => {
     res.status(401).json({ success: false, message: "Unauthorised user!", });
   }
 };
-
-
-export default { registerUser, loginUser, logoutUser, authMiddleware, router };

@@ -1,55 +1,54 @@
 import { Navigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { startTransition } from "../../store/auth";
 
-function CheckAuth({ isAuthenticated, user, children }) 
-{
+function CheckAuth({ isAuthenticated, user, children }) {
   const location = useLocation();
-  console.log(location.pathname, isAuthenticated);
+  const dispatch = useDispatch();
+  console.log("CheckAuth:", location.pathname, isAuthenticated);
 
-  if (location.pathname === "/") 
-  {
-    if (!isAuthenticated) 
-    {
-      return <Navigate to="/auth/login" />;
-    } 
-    else {
-      if (user?.role === "admin") 
-      {
-        return <Navigate to="/admin/dashboard" />;
-      } 
-      else {
-        return <Navigate to="/shop/home" />;
+  const navigateWithTransition = (path) => {
+    dispatch(startTransition());
+    return <Navigate to={path} />;
+  };
+
+  if (location.pathname === "/") {
+    if (!isAuthenticated) {
+      return navigateWithTransition("/auth/login");
+    } else {
+      if (user?.role === "admin") {
+        return navigateWithTransition("/admin/dashboard");
+      } else {
+        return navigateWithTransition("/shop/home");
       }
     }
   }
 
-  if (!isAuthenticated && !( location.pathname.includes("/login") || 
-                            location.pathname.includes("/register"))) 
-                    {
-    return <Navigate to="/auth/login" />;
+  if (!isAuthenticated && 
+      !(location.pathname.includes("/login") || location.pathname.includes("/register"))) {
+    return navigateWithTransition("/auth/login");
   }
 
-  if (isAuthenticated && (location.pathname.includes("/login") ||
-                          location.pathname.includes("/register"))) 
- {
-    if (user?.role === "admin") 
-    {
-        return <Navigate to="/admin/dashboard" />;
+  if (isAuthenticated && 
+      (location.pathname.includes("/login") || location.pathname.includes("/register"))) {
+    if (user?.role === "admin") {
+      return navigateWithTransition("/admin/dashboard");
     } else {
-        return <Navigate to="/shop/home" />;
+      return navigateWithTransition("/shop/home");
     }
- }
+  }
 
-  if (isAuthenticated && user?.role !== "admin" &&
-    location.pathname.includes("admin")) 
-    {
-        return <Navigate to="/unauth-page" />;
-    }
+  if (isAuthenticated && 
+      user?.role !== "admin" &&
+      location.pathname.includes("admin")) {
+    return navigateWithTransition("/unauth-page");
+  }
 
-  if (isAuthenticated && user?.role === "admin" &&
-    location.pathname.includes("shop")) 
-    {
-        return <Navigate to="/admin/dashboard" />;
-    }
+  if (isAuthenticated && 
+      user?.role === "admin" &&
+      location.pathname.includes("shop")) {
+    return navigateWithTransition("/admin/dashboard");
+  }
 
   return <>{children}</>;
 }

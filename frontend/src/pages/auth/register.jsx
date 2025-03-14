@@ -2,7 +2,7 @@ import { registerFormControls } from "../../config";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { registerUser } from "../../store/auth"; 
+import { registerUser, startTransition } from "../../store/auth"; 
 import { toast } from "sonner";  
 import CommonForm from "../../components/common/form";
 
@@ -20,11 +20,11 @@ function AuthRegister()
 
   function onSubmit(event) {
     event.preventDefault();
-    dispatch(registerUser(formData)).then((data) => 
-    {
-      if (data?.payload?.success) 
-      {
-        toast(data?.payload?.message);
+    dispatch(registerUser(formData)).then((data) => {
+      if (data?.payload?.success) {
+        toast.success(data?.payload?.message);
+  
+        dispatch(startTransition());
         navigate("/auth/login");
       } 
       else {
@@ -32,8 +32,6 @@ function AuthRegister()
       }
     });
   }
-
-  console.log(formData);
 
   return (
     <div className="mx-auto w-full max-w-md space-y-6">

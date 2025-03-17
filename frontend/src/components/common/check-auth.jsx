@@ -24,13 +24,12 @@ function CheckAuth({ isAuthenticated, user, children }) {
     }
   }
 
-  if (!isAuthenticated && 
-      !(location.pathname.includes("/login") || location.pathname.includes("/register"))) {
-    return navigateWithTransition("/auth/login");
+  if (!isAuthenticated && location.pathname !== "/auth") {
+    return navigateWithTransition("/auth");
   }
 
   if (isAuthenticated && 
-      (location.pathname.includes("/login") || location.pathname.includes("/register"))) {
+      (location.pathname.includes("/auth"))) {
     if (user?.role === "admin") {
       return navigateWithTransition("/admin/dashboard");
     } else {

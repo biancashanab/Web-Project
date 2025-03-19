@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { checkAuth, endTransition } from "./store/auth";
+import { checkAuth } from "./store/auth";
 import { useEffect, useState } from "react";
 import LoadingCat from "./components/common/loadingCat/loadingCat";
 import "./App.css";
@@ -23,19 +23,15 @@ import UnauthPage from "./pages/unauth-page";
 import AuthPage from "./pages/auth/AuthPage";
 import HomePage from "./pages/start/start";
 
-
-
-
 function App() 
 {
-  const { user, isAuthenticated, isLoading, isTransitioning } = useSelector(
+  const { user, isAuthenticated, isLoading } = useSelector(
     (state) => state.auth
   );
   const dispatch = useDispatch();
 
   const [forcedLoading, setForcedLoading] = useState(true);
   const MINIMUM_LOADING_TIME = 1500;
-  const TRANSITION_TIME = 1500;
 
   useEffect(() => {
     dispatch(checkAuth());
@@ -47,22 +43,10 @@ function App()
     return () => clearTimeout(timer);
   }, [dispatch]);
 
-  useEffect(() => {
-    if (isTransitioning) {
-      // End transition after delay
-      const transitionTimer = setTimeout(() => {
-        dispatch(endTransition());
-      }, TRANSITION_TIME);
-
-      return () => clearTimeout(transitionTimer);
-    }
-  }, [isTransitioning, dispatch]);
-
-  if (isLoading || forcedLoading || isTransitioning) {
+  if (isLoading || forcedLoading) {
     console.log("Showing loading screen:", {
       isLoading,
       forcedLoading,
-      isTransitioning,
     });
     return <LoadingCat />;
   }
@@ -87,7 +71,6 @@ function App()
           <Route index element={<AuthPage />} />
           <Route path="/auth/*" element={<Navigate to="/auth" replace />} />
         </Route>
-
 
         {/* Admin routes */}
         <Route

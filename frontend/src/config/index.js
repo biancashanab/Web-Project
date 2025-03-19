@@ -39,7 +39,7 @@ export const registerFormControls = [
     },
   ];
   
-export const addAnimalFormElements = [
+export const addPetFormElements = [
     {
       label: "Animal Name",
       name: "name",

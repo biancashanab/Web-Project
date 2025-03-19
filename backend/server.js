@@ -9,7 +9,7 @@ dotenv.config()
 
 // Rutele
 import authRouter from "./routes/auth/auth-routes.js";
-//import adminProductsRouter from "./routes/admin/products-routes";
+import adminPetsRouter from "./routes/admin/pet-routes.js";
 //import adminOrderRouter from "./routes/admin/order-routes";
 //import shopProductsRouter from "./routes/shop/products-routes";
 //import shopCartRouter from "./routes/shop/cart-routes";
@@ -49,7 +49,7 @@ app.use(helmet({
 // Rutele aplicației
 
 app.use("/api/auth", authRouter);
-//app.use("/api/admin/products", adminProductsRouter);
+app.use("/api/admin/pets", adminPetsRouter);
 //app.use("/api/admin/orders", adminOrderRouter);
 //app.use("/api/shop/products", shopProductsRouter);
 //app.use("/api/shop/cart", shopCartRouter);

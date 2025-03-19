@@ -4,7 +4,6 @@ import axios from "axios";
 const initialState = {
   isAuthenticated: false,
   isLoading: false,
-  isTransitioning: false, // New state for transitions between pages after auth actions
   user: null,
 };
 

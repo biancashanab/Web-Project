@@ -46,7 +46,7 @@ export const loginUser = async (req, res) => {
                               userName: checkUser.userName,
       },
       "CLIENT_SECRET_KEY",
-      { expiresIn: "1m" }  //trebuie sa modific in mai putin de 10 minut
+      { expiresIn: "10m" }  //trebuie sa modific in mai putin de 10 minut
     );
 
     res.cookie("token", token, { httpOnly: true, secure: false }).json({ success: true, message: "Logged in successfully",

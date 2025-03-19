@@ -21,6 +21,10 @@ import ShoppingCheckout from "./pages/shopping-view/checkout";
 import CheckAuth from "./components/common/check-auth";
 import UnauthPage from "./pages/unauth-page";
 import AuthPage from "./pages/auth/AuthPage";
+import HomePage from "./pages/start/start";
+
+
+
 
 function App() 
 {
@@ -69,15 +73,7 @@ function App()
     <div className="min-h-screen w-full bg-white">
       <Routes>
         {/* Add root route that redirects to a default page */}
-        <Route
-          path="/"
-          element={
-            <CheckAuth
-              isAuthenticated={isAuthenticated}
-              user={user}
-            ></CheckAuth>
-          }
-        />
+        <Route path="/" element={<HomePage />} />
 
         {/* Auth routes */}
         <Route
@@ -109,14 +105,7 @@ function App()
         </Route>
 
         {/* Shopping routes */}
-        <Route
-          path="/shop"
-          element={
-            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
-              <ShoppingLayout />
-            </CheckAuth>
-          }
-        >
+        <Route path="/shop" element={<ShoppingLayout />} >
           <Route path="home" element={<ShoppingHome />} />
           <Route path="account" element={<ShoppingAccount />} />
           <Route path="listing" element={<ShoppingListing />} />

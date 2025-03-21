@@ -37,7 +37,8 @@ function AdminPets()
   const [imageLoadingState, setImageLoadingState] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
 
-  const { petList } = useSelector((state) => state.adminPets);
+  //const { petList } = useSelector((state) => state.adminPets);
+  const { petList = [] } = useSelector(state => state.pets || {});
   const dispatch = useDispatch();
 
   function onSubmit(event) 

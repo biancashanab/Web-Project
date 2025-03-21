@@ -9,7 +9,7 @@ import "./App.css";
 import AuthLayout from "./components/auth/layout";
 import AdminLayout from "./components/admin/layout";
 import AdminDashboard from "./components/admin/dashboard";
-import AdminPets from "./components/admin/pets";
+import AdminPets from "./pages/admin/pets";
 import AdminAdoptionOrders from "./components/admin/adoption_orders";
 import AdminFeatures from "./components/admin/features";
 import ShoppingLayout from "./components/shopping/layout";

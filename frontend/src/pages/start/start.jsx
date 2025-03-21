@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Cat, FileText, Home } from "lucide-react"; 
+import Footer from "../../components/common/footer/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 
 import "./start.css";
 
-function HomePage() 
-{
+function HomePage() {
   return (
     <div className="homepage">
       {/* Navbar */}
@@ -18,7 +18,11 @@ function HomePage()
           <li><Link to="/about">About</Link></li>
           <li><Link to="/testimonials">Testimonials</Link></li>
           <li><Link to="/contact">Contact</Link></li>
-          <li><Link to="/shop/home" className="btn-orange see-pets-btn">See Pets</Link></li>
+          <li>
+            <Link to="/shop/home" className="btn-orange see-pets-btn">
+              See Pets
+            </Link>
+          </li>
         </ul>
       </nav>
 
@@ -53,7 +57,7 @@ function HomePage()
           {/* Card 1 */}
           <Card className="w-80 text-center">
             <CardHeader>
-            <Cat size={40} color="orange" className="mx-auto" />
+              <Cat size={40} color="orange" className="mx-auto" />
               <CardTitle className="text-lg mt-4">Choose an animal</CardTitle>
             </CardHeader>
             <CardContent>
@@ -66,18 +70,20 @@ function HomePage()
           {/* Card 2 */}
           <Card className="w-80 text-center">
             <CardHeader>
-            <FileText color="orange" className="mx-auto w-10 h-10" />
+              <FileText color="orange" className="mx-auto w-10 h-10" />
               <CardTitle className="text-lg mt-4">Complete the form</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600"> Complete the form to help us learn something about you. </p>
+              <p className="text-gray-600">
+                Complete the form to help us learn something about you.
+              </p>
             </CardContent>
           </Card>
 
           {/* Card 3 */}
           <Card className="w-80 text-center">
             <CardHeader>
-            <Home color="orange" className="mx-auto w-10 h-10" />
+              <Home color="orange" className="mx-auto w-10 h-10" />
               <CardTitle className="text-lg mt-4">Receive approval</CardTitle>
             </CardHeader>
             <CardContent>
@@ -88,9 +94,12 @@ function HomePage()
           </Card>
         </div>
       </section>
+
+      {/* Footer */}
+      <Footer />
+     
     </div>
   );
 }
-
 
 export default HomePage;

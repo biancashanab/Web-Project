@@ -10,6 +10,7 @@ dotenv.config()
 // Rutele
 import authRouter from "./routes/auth/auth-routes.js";
 import adminPetsRouter from "./routes/admin/pet-routes.js";
+//import adminImageRouter from "./routes/admin/image-routes.js";
 //import adminOrderRouter from "./routes/admin/order-routes";
 //import shopProductsRouter from "./routes/shop/products-routes";
 //import shopCartRouter from "./routes/shop/cart-routes";
@@ -36,7 +37,8 @@ const PORT = process.env.PORT || 8080;
 app.use(cors({
     credentials : true,
     origin : process.env.FRONTEND_URL,
-    methods : ["GET","POST","PUT","DELETE"]
+    methods : ["GET","POST","PUT","DELETE"],
+    allowedHeaders : ["Content-Type", "Authorization", "Expires", "Cache-Control", "Pragma"]
 }))
 app.use(express.json())
 app.use(cookieParser())
@@ -47,6 +49,8 @@ app.use(helmet({
 
 
 // Rutele aplicației
+
+//app.use("/api/admin", adminImageRouter);
 
 app.use("/api/auth", authRouter);
 app.use("/api/admin/pets", adminPetsRouter);

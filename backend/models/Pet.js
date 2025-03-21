@@ -4,11 +4,12 @@ const PetSchema = new mongoose.Schema(
   {
     image: String,
     title: String,
-    description: String,
-    category: String,
-    breed: String,
-    species: String,
+    name: String,
     age: Number,
+    species: String,
+    breed: String,
+    size: String,
+    description: String,
   },
   { timestamps: true }
 );

@@ -35,7 +35,8 @@ function ProductImageUpload({
   function handleDrop(event) {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files?.[0];
-    if (droppedFile) setImageFile(droppedFile);
+    if (droppedFile) 
+      setImageFile(droppedFile);
   }
 
   function handleRemoveImage() {
@@ -51,19 +52,19 @@ function ProductImageUpload({
     const data = new FormData();
     data.append("my_file", imageFile);
     const response = await axios.post(
-      "http://localhost:8080/api/admin/upload-image",
+      "http://localhost:8080/api/admin/pets/upload-image",
       data
     );
     console.log(response, "response");
 
     if (response?.data?.success) {
-      setUploadedImageUrl(response.data.result.url);
+      setUploadedImageUrl(response.data.result.url);    //incarc url imagine
       setImageLoadingState(false);
     }
   }
 
   useEffect(() => {
-    if (imageFile !== null) uploadImageToCloudinary();
+    if (imageFile !== null) uploadImageToCloudinary(); 
   }, [imageFile]);
 
   return (

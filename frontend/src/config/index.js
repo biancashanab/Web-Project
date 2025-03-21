@@ -40,7 +40,14 @@ export const registerFormControls = [
   ];
   
 export const addPetFormElements = [
-    {
+  {
+    label: "Title",
+    name: "title",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter product title",
+  },  
+  {
       label: "Animal Name",
       name: "name",
       componentType: "input",

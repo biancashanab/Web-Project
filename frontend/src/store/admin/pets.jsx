@@ -66,7 +66,7 @@ export const addNewPet = createAsyncThunk(
     name: "adminPets",
     initialState,
     reducers: {},
-    extraReducers: (builder) => {
+    extraReducers: (builder) => {    
       builder
         .addCase(fetchAllPets.pending, (state) => {
           state.isLoading = true;

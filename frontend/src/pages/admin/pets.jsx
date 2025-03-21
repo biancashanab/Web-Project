@@ -37,8 +37,7 @@ function AdminPets()
   const [imageLoadingState, setImageLoadingState] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
 
-  //const { petList } = useSelector((state) => state.adminPets);
-  const { petList = [] } = useSelector(state => state.pets || {});
+  const { petList } = useSelector((state) => state.adminPets);
   const dispatch = useDispatch();
 
   function onSubmit(event) 
@@ -47,17 +46,18 @@ function AdminPets()
 
     currentEditedId !== null
       ? dispatch(
-          editProduct({
+          editPet({
             id: currentEditedId,
             formData,
           })
         ).then((data) => {
           console.log(data, "edit");
 
-          if (data?.payload?.success) {
+          if (data?.payload?.success) 
+          {
             dispatch(fetchAllPets());
             setFormData(initialFormData);
-            setOpenCreatePetDialog(false);
+            setOpenCreatePetsDialog(false);
             setCurrentEditedId(null);
           }
         })
@@ -72,9 +72,8 @@ function AdminPets()
             setOpenCreatePetsDialog(false);
             setImageFile(null);
             setFormData(initialFormData);
-            toast({
-              title: "Pet advertisement added successfully",
-            });
+            toast.success(data?.payload?.message);
+           
           }
         });
   }
@@ -109,6 +108,7 @@ function AdminPets()
         {petList && petList.length > 0
           ? petList.map((petItem) => (
               <AdminPetTile
+                key={petItem.id} 
                 setFormData={setFormData}
                 setOpenCreatePetsDialog={setOpenCreatePetsDialog}
                 setCurrentEditedId={setCurrentEditedId}

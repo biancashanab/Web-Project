@@ -1,5 +1,5 @@
 import { imageUploadUtil } from "../../helpers/cloudinary.js";
-import Pet from "../../models/Pet.js"; 
+import Pet from "../../models/Pet.js";
 
 export const handleImageUpload = async (req, res) => {
   try {
@@ -21,31 +21,29 @@ export const handleImageUpload = async (req, res) => {
 };
 
 export const addPet = async (req, res) => {
-  try {
-    const {
-      image,
-      title,
-      age,
-      description,
-      species,
-      breed,
-    } = req.body;
+  try 
+  {
+    const { image, title, name, age, description, species, breed, size } = req.body;
 
     const newlyCreatedPet = new Pet({
       image,
       title,
+      name,
       age,
-      description,
       species,
       breed,
+      size,
+      description,
     });
 
-    await newlyCreatedPet.save();
+    await newlyCreatedPet.save(); //salvez in baza de date
+
     res.status(201).json({
       success: true,
       data: newlyCreatedPet,
     });
-  } catch (e) {
+  } 
+  catch (e) {
     console.log(e);
     res.status(500).json({
       success: false,
@@ -72,15 +70,8 @@ export const fetchAllPets = async (req, res) => {
 
 export const editPet = async (req, res) => {
   try {
-    const { id } = req.params;
-    const {
-      image,
-      title,
-      age,
-      description,
-      species,
-      breed,
-    } = req.body;
+    const { id } = req.params;    //id-ul pet-ului pe care vreau sa il editez
+    const { image, title, name, age, description, species, breed, size } = req.body;
 
     let findPet = await Pet.findById(id);
     if (!findPet)
@@ -89,14 +80,18 @@ export const editPet = async (req, res) => {
         message: "Pet not found",
       });
 
+    // daca gasesc pet-ul, ii schimb atributele cu cele noi
+    findPet.image = image || findPet.image;
     findPet.title = title || findPet.title;
+    findPet.name = name || findPet.name;
     findPet.description = description || findPet.description;
     findPet.species = species || findPet.species;
     findPet.breed = breed || findPet.breed;
-    findPet.image = image || findPet.image;
+    findPet.size = size || findPet.size;
     findPet.age = age || findPet.age;
 
-    await findPet.save();
+    await findPet.save();   //salvez modificarile in baza de date
+    
     res.status(200).json({
       success: true,
       data: findPet,

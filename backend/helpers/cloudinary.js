@@ -1,13 +1,17 @@
 import cloudinary from "cloudinary";
 import multer from "multer";
+import dotenv from "dotenv";
 
-cloudinary.v2.config({   // Configurare pentru cloudinary.com
-  cloud_name: "dckm7bcu7",
-  api_key: "778241741463176",
-  api_secret: "9eXIP_8ynNKi_Da0bD27hB32cUA",
+dotenv.config();
+
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = multer.memoryStorage(); // Stocare în memorie
+
+const storage = new multer.memoryStorage(); // Stocare în memorie
 
 async function imageUploadUtil(file) {
   const result = await cloudinary.v2.uploader.upload(file, { // Upload în Cloudinary

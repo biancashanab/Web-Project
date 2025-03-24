@@ -8,6 +8,7 @@ const PetSchema = new mongoose.Schema(
     age: Number,
     species: String,
     breed: String,
+    colour: String,
     size: String,
     description: String,
   },

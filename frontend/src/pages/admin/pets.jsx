@@ -18,6 +18,8 @@ import {
 } from "../../store/admin/pets";
 import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { DialogTitle} from "@radix-ui/react-dialog";
 
 const initialFormData = {
   image: null,
@@ -127,7 +129,11 @@ function AdminPets()
         }}
       >
         <SheetContent side="right" className="overflow-auto">
+            <VisuallyHidden>
+                <DialogTitle>Menu</DialogTitle>
+              </VisuallyHidden>
           <SheetHeader>
+            
             <SheetTitle>
               {currentEditedId !== null ? "Edit Pet Advertisement" : "Add New Pet Advertisement"}
             </SheetTitle>

@@ -51,7 +51,8 @@ import {
     );
   }
   
-  function AdminSideBar({ open, setOpen }) {
+  function AdminSideBar({ open, setOpen }) 
+  {
     const navigate = useNavigate();
   
     return (

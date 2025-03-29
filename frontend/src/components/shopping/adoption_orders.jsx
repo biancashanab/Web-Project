@@ -10,42 +10,40 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import AdminOrderDetailsView from "./order-details";
+import ShoppingOrderDetailsView from "./adoption_order-details";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getAllOrdersForAdmin,
-  getOrderDetailsForAdmin,
+  getAllOrdersByUserId,
+  getOrderDetails,
   resetOrderDetails,
-} from "../../store/admin/adoption_order";
+} from "../../store/shop/order";
 import { Badge } from "../ui/badge";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { DialogTitle } from '@radix-ui/react-dialog';
 
-
-function AdminAdoptionOrders() 
+function AdoptionOrders() 
 {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
-  const { orderList, orderDetails } = useSelector((state) => state.adminAdoptionOrder);
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const { orderList, orderDetails } = useSelector((state) => state.shopOrder);
 
   function handleFetchOrderDetails(getId) {
-    dispatch(getOrderDetailsForAdmin(getId));
+    dispatch(getOrderDetails(getId));
   }
 
   useEffect(() => {
-    dispatch(getAllOrdersForAdmin());
+    dispatch(getAllOrdersByUserId(user?.id));
   }, [dispatch]);
-
-  console.log(orderDetails, "orderList");
 
   useEffect(() => {
     if (orderDetails !== null) setOpenDetailsDialog(true);
   }, [orderDetails]);
 
+  console.log(orderDetails, "orderDetails");
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>All Adoption Orders</CardTitle>
+        <CardTitle>Order History</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
@@ -54,7 +52,7 @@ function AdminAdoptionOrders()
               <TableHead>Order ID</TableHead>
               <TableHead>Order Date</TableHead>
               <TableHead>Order Status</TableHead>
-              <TableHead>Order Taxes</TableHead>
+              <TableHead>Order Price</TableHead>
               <TableHead>
                 <span className="sr-only">Details</span>
               </TableHead>
@@ -88,7 +86,9 @@ function AdminAdoptionOrders()
                           dispatch(resetOrderDetails());
                         }}
                       >
-                          <DialogTitle as={VisuallyHidden}>Your Order Details</DialogTitle>
+                        <Dialog.Title asChild>
+                          <VisuallyHidden>My Dialog Title</VisuallyHidden>
+                        </Dialog.Title>
                         <Button
                           onClick={() =>
                             handleFetchOrderDetails(orderItem?._id)
@@ -96,7 +96,7 @@ function AdminAdoptionOrders()
                         >
                           View Details
                         </Button>
-                        <AdminOrderDetailsView orderDetails={orderDetails} />
+                        <ShoppingOrderDetailsView orderDetails={orderDetails} />
                       </Dialog>
                     </TableCell>
                   </TableRow>
@@ -109,4 +109,4 @@ function AdminAdoptionOrders()
   );
 }
 
-export default AdminAdoptionOrders;
+export default AdoptionOrders;

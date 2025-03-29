@@ -1,63 +1,37 @@
-import { useState } from "react";
-import CommonForm from "../common/form";
+import { useSelector } from "react-redux";
+import { Badge } from "../ui/badge";
 import { DialogContent } from "../ui/dialog";
 import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
-import { Badge } from "../ui/badge";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getAllOrdersForAdmin,
-  getOrderDetailsForAdmin,
-  updateOrderStatus,
-} from "../../store/admin/adoption_order";
-import { toast } from "sonner";
-import { DialogTitle } from "@radix-ui/react-dialog";
+import { DialogDescription } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
-const initialFormData = {
-  status: "",
-};
-
-function AdminOrderDetailsView({ orderDetails }) 
+function ShoppingOrderDetailsView({ orderDetails }) 
 {
-  const [formData, setFormData] = useState(initialFormData);
   const { user } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
-
-  console.log(orderDetails, "orderDetails");
-
-  function handleUpdateStatus(event) {
-    event.preventDefault();
-    const { status } = formData;
-
-    dispatch(
-      updateOrderStatus({ id: orderDetails?._id, orderStatus: status })
-    ).then((data) => {
-      if (data?.payload?.success) {
-        dispatch(getOrderDetailsForAdmin(orderDetails?._id));
-        dispatch(getAllOrdersForAdmin());
-        setFormData(initialFormData);
-        toast.success(data?.payload?.message);
-      }
-    });
-  }
+  const adoptionFee = 15;
 
   return (
-    <DialogContent className="sm:max-w-[600px]" >
-      <DialogTitle as={VisuallyHidden}>Order Details</DialogTitle>
+    <DialogContent className="sm:max-w-[600px]">
+      <VisuallyHidden>
+        <DialogTitle>Order Details</DialogTitle>
+        <DialogDescription>
+          View the details of your adoption order, including order ID, date, and status.
+        </DialogDescription>
+      </VisuallyHidden>
       <div className="grid gap-6">
         <div className="grid gap-2">
           <div className="flex mt-6 items-center justify-between">
-            <p className="font-medium">Order ID</p>
+            <p className="font-medium">Adoption Order ID</p>
             <Label>{orderDetails?._id}</Label>
           </div>
           <div className="flex mt-2 items-center justify-between">
-            <p className="font-medium">Order Date</p>
+            <p className="font-medium">Adoption Order Date</p>
             <Label>{orderDetails?.orderDate.split("T")[0]}</Label>
           </div>
           <div className="flex mt-2 items-center justify-between">
-            <p className="font-medium">Order Tax</p>
-            <Label>${orderDetails?.totalAmount}</Label>
+            <p className="font-medium">Adoption Order Tax</p>
+            <Label>${adoptionFee}</Label>
           </div>
           <div className="flex mt-2 items-center justify-between">
             <p className="font-medium">Payment method</p>
@@ -87,13 +61,12 @@ function AdminOrderDetailsView({ orderDetails })
         <Separator />
         <div className="grid gap-4">
           <div className="grid gap-2">
-            <div className="font-medium">Order Details</div>
+            <div className="font-medium">Adoption Order Details</div>
             <ul className="grid gap-3">
               {orderDetails?.cartItems && orderDetails?.cartItems.length > 0
                 ? orderDetails?.cartItems.map((item) => (
                     <li className="flex items-center justify-between">
                       <span>Title: {item.title}</span>
-                      <span>Quantity: {item.quantity}</span>
                     </li>
                   ))
                 : null}
@@ -113,32 +86,9 @@ function AdminOrderDetailsView({ orderDetails })
             </div>
           </div>
         </div>
-
-        <div>
-          <CommonForm
-            formControls={[
-              {
-                label: "Order Status",
-                name: "status",
-                componentType: "select",
-                options: [
-                  { id: "pending", label: "Pending" },
-                  { id: "inProcess", label: "In Process" },
-                  { id: "inShipping", label: "In Shipping" },
-                  { id: "delivered", label: "Delivered" },
-                  { id: "rejected", label: "Rejected" },
-                ],
-              },
-            ]}
-            formData={formData}
-            setFormData={setFormData}
-            buttonText={"Update Order Status"}
-            onSubmit={handleUpdateStatus}
-          />
-        </div>
       </div>
     </DialogContent>
   );
 }
 
-export default AdminOrderDetailsView;
+export default ShoppingOrderDetailsView;

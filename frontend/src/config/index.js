@@ -197,7 +197,7 @@ export const addPetFormElements = [
         { id: "adult", label: "Adult" },
         { id: "senior", label: "Senior" },
       ],
-      coloures: [
+      colours: [
         { id: "black", label: "Black" },
         { id: "white", label: "White" },
         { id: "brown", label: "Brown" },

@@ -131,7 +131,7 @@ export const addPetFormElements = [
     {
         id: "adopt",
         label: "Adopt",
-        path: "/shop/adopt",
+        path: "/shop/listing",
     },
     {
       id: "dogs",
@@ -156,7 +156,7 @@ export const addPetFormElements = [
     {
         id: "about",
         label: "About Us",
-        path: "/about",
+        path: "/shop/about",
       },
     {
       id: "search",
@@ -215,8 +215,8 @@ export const addPetFormElements = [
   };
   
   export const sortOptions = [
-    { id: "price-lowtohigh", label: "Price: Low to High" },
-    { id: "price-hightolow", label: "Price: High to Low" },
+    { id: "age-lowtohigh", label: "Age: Low to High" },
+    { id: "age-hightolow", label: "Age: High to Low" },
     { id: "title-atoz", label: "Title: A to Z" },
     { id: "title-ztoa", label: "Title: Z to A" },
   ];

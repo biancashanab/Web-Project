@@ -1,58 +1,69 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
-import { SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
+import { SheetContent, SheetHeader, SheetTitle, SheetFooter } from "../ui/sheet";
 import UserCartItemsContent from "./cart-items-content";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { DialogTitle } from "@radix-ui/react-dialog";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchOrderHistory } from "../../store/shop/cart";
-import { useEffect } from "react";
-import { createSelector } from 'reselect';
+import { DialogTitle, DialogContent } from "@radix-ui/react-dialog";
+import { useSelector } from "react-redux"; 
 
-function UserCartWrapper({ cartItems, setOpenCartSheet }) {
+function UserCartWrapper({ setOpenCartSheet }) 
+{ 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth); // Presupunem că ai un slice auth cu user
-  // Dacă state.shoppingCart nu este definit, extragem direct valoarea cu un fallback
-  const hasOrdered = useSelector((state) => state.shoppingCart?.hasOrdered || false);
+  const cartData = useSelector((state) => state.shopCart.cartItems);
+  const cartItems = cartData?.items || []; 
+  const isLoading = useSelector((state) => state.shopCart.isLoading); 
+  const adoptionFeePerPet = 15;
+  const totalAmount = (cartItems.length * adoptionFeePerPet).toFixed(2);
 
-  useEffect(() => {
-    if (user?.id) {
-      dispatch(fetchOrderHistory(user.id));
-    }
-  }, [dispatch, user?.id]);
-  
+
   return (
-    <SheetContent className="sm:max-w-md" aria-labelledby="cart-title">
+    <SheetContent className="sm:max-w-md flex flex-col h-full" aria-labelledby="cart-title">
       <VisuallyHidden>
-        <DialogTitle>Menu</DialogTitle>
+        <DialogTitle>Shopping Cart</DialogTitle>
+        <DialogContent>Content</DialogContent>
       </VisuallyHidden>
-              
+
       <SheetHeader>
         <SheetTitle id="cart-title">Your Cart</SheetTitle>
       </SheetHeader>
-      
-      <div className="mt-8 space-y-4">
-        {cartItems && cartItems.length > 0
-          ? cartItems.map((item) => (
-              <UserCartItemsContent key={item.id || item.PetId} cartItem={item} />
-            ))
-          : null}
+
+      <div className="flex-1 overflow-y-auto mt-6 mb-4 pr-4"> 
+        {isLoading ? (
+          <p>Loading...</p> 
+        ) : cartItems && cartItems.length > 0 ? (
+          <div className="space-y-3">
+              {cartItems.map((item) => (
+                item?.PetId ? (
+                   <UserCartItemsContent key={item.PetId} cartItem={item} />
+                ) : null
+              ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground mt-10">Your cart is empty</p>
+        )}
       </div>
-      <div className="mt-8 space-y-4">
-        <div className="flex justify-between">
-          <span className="font-bold">Total</span>
-        </div>
-      </div>
-      <Button
-        onClick={() => {
-          navigate("/shop/checkout");
-          setOpenCartSheet(false);
-        }}
-        className="w-full mt-6"
-      >
-        Checkout
-      </Button>
+
+      {cartItems.length > 0 && (
+          <SheetFooter className="mt-auto border-t pt-4">
+            <div className="w-full space-y-4">
+               <div className="flex justify-between font-semibold text-lg">
+                 <span>Total</span>
+                 <span>${totalAmount}</span>
+               </div>
+               <Button
+                 onClick={() => {
+                   navigate("/shop/checkout");
+                   setOpenCartSheet(false);
+                 }}
+                 className="w-full"
+                 size="lg"
+                 disabled={isLoading || cartItems.length === 0}
+               >
+                 Continue to the adoption form
+               </Button>
+            </div>
+          </SheetFooter>
+        )}
     </SheetContent>
   );
 }

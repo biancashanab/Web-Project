@@ -1,113 +1,76 @@
-import { Minus, Plus, Trash } from "lucide-react";
-import { Button } from "../ui/button";
+import { Trash } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteCartItem, updateCartQuantity } from "../../store/shop/cart";
+import { deleteCartItem } from "../../store/shop/cart";
 import { toast } from "sonner";
 
 function UserCartItemsContent({ cartItem }) 
 {
   const { user } = useSelector((state) => state.auth);
-  const { cartItems } = useSelector((state) => state.shopCart);
-  const { petList } = useSelector((state) => state.shopPets);
   const dispatch = useDispatch();
+  const adoptionFeePerPet = 15;
 
-  function handleUpdateQuantity(getCartItem, typeOfAction) 
+  if (!user?.id) {
+    console.warn("UserCartItemsContent: User not fully loaded, skipping render.");
+    return null;
+  }
+
+  function handleCartItemDelete() 
   {
-    if (typeOfAction === "plus") {
-      let getCartItems = cartItems.items || [];
+    console.log("handleCartItemDelete called.");
+    console.log("Current User State:", JSON.stringify(user));
+    console.log("Cart Item to Delete:", JSON.stringify(cartItem));
 
-      if (getCartItems.length) {
-        const indexOfCurrentCartItem = getCartItems.findIndex(
-          (item) => item.PetId === getCartItem?.PetId
-        );
+    const currentUserId = user?.id;
+    const currentPetId = cartItem?.PetId;
 
-        const getCurrentProductIndex = petList.findIndex(
-          (product) => product._id === getCartItem?.PetId
-        );
-        const getTotalStock = petList[getCurrentProductIndex].totalStock;
+    console.log("Values for Check: UserID=", currentUserId, "PetID=", currentPetId);
 
-        console.log(getCurrentProductIndex, getTotalStock, "getTotalStock");
-
-        if (indexOfCurrentCartItem > -1) {
-          const getQuantity = getCartItems[indexOfCurrentCartItem].quantity;
-          if (getQuantity + 1 > getTotalStock) {
-            toast.error(`Only ${getTotalStock} quantity can be added for this item`);
-            return;
-          }
-        }
-      }
+    if (!currentUserId || !currentPetId) 
+    {
+      toast.error("Invalid data for deletion (User or Pet missing).");
+      console.error("DELETE ABORTED: Invalid data. UserID:", currentUserId, "PetID:", currentPetId);
+      return;
     }
 
+    console.log("Dispatching deleteCartItem with:", { userId: currentUserId, PetId: currentPetId });
+    
     dispatch(
-      updateCartQuantity({
-        userId: user?.id,
-        PetId: getCartItem?.PetId,
-        quantity:
-          typeOfAction === "plus"
-            ? getCartItem?.quantity + 1
-            : getCartItem?.quantity - 1,
-      })
-    ).then((data) => {
-      if (data?.payload?.success) {
-        toast.success("Cart item is updated successfully");
+      deleteCartItem({ userId: currentUserId, PetId: currentPetId })
+    ).then((action) => {
+      if (action.payload?.success) {
+        toast.success("Pet removed from cart");
+      } else {
+        const errorMessage = action.payload?.message || action.error?.message || 'Unknown deletion error';
+        toast.error(`${errorMessage}`);
+        console.error("Delete failed:", action);
       }
+    }).catch(error => {
+      console.error("Error dispatching deleteCartItem:", error);
+      toast.error("An unexpected error occurred during deletion.");
     });
   }
 
-  function handleCartItemDelete(getCartItem) {
-    dispatch(
-      deleteCartItem({ userId: user?.id, PetId: getCartItem?.PetId })
-    ).then((data) => {
-      if (data?.payload?.success) {
-        toast.success("Cart item is deleted successfully");
-      }
-    });
+  if (!cartItem) {
+    return null;
   }
 
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex items-center space-x-4 py-2 border-b last:border-b-0">
       <img
-        src={cartItem?.image}
-        alt={cartItem?.title}
-        className="w-20 h-20 rounded object-cover"
+        src={cartItem.image || "/placeholder.svg"}
+        alt={cartItem.title || "Pet"}
+        className="w-16 h-16 rounded object-cover flex-shrink-0"
       />
-      <div className="flex-1">
-        <h3 className="font-extrabold">{cartItem?.title}</h3>
-        <div className="flex items-center gap-2 mt-1">
-          <Button
-            variant="outline"
-            className="h-8 w-8 rounded-full"
-            size="icon"
-            disabled={cartItem?.quantity === 1}
-            onClick={() => handleUpdateQuantity(cartItem, "minus")}
-          >
-            <Minus className="w-4 h-4" />
-            <span className="sr-only">Decrease</span>
-          </Button>
-          <span className="font-semibold">{cartItem?.quantity}</span>
-          <Button
-            variant="outline"
-            className="h-8 w-8 rounded-full"
-            size="icon"
-            onClick={() => handleUpdateQuantity(cartItem, "plus")}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="sr-only">Increase</span>
-          </Button>
-        </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold truncate">{cartItem.title || "Name not available"}</h3>
+        <p className="text-sm text-muted-foreground">Adoption fee: ${adoptionFeePerPet.toFixed(2)}</p>
       </div>
-      <div className="flex flex-col items-end">
-        <p className="font-semibold">
-          $
-          {(
-            (cartItem?.salePrice > 0 ? cartItem?.salePrice : cartItem?.price) *
-            cartItem?.quantity
-          ).toFixed(2)}
-        </p>
+      <div className="flex items-center">
         <Trash
-          onClick={() => handleCartItemDelete(cartItem)}
-          className="cursor-pointer mt-1"
-          size={20}
+          onClick={handleCartItemDelete}
+          className="cursor-pointer text-destructive hover:text-destructive/80"
+          size={18}
+          aria-label={`Delete ${cartItem.title || 'pet'} from cart`}
         />
       </div>
     </div>

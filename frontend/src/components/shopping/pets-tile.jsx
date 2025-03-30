@@ -3,22 +3,41 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 function ShoppingPetTile({ pet, handleGetPetDetails, handleAddtoCart }) 
 {
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const cartData = useSelector((state) => state.shopCart.cartItems);
+  const cartItems = cartData?.items || [];
+
   const navigate = useNavigate();
-  const adoptionFee = 15; // Taxa standard de adopție
+  const adoptionFee = 15;
+
+  const isPetInCart = cartItems.some(item => item && item.PetId === pet?._id);
 
   function handleAdoptClick() 
   {
-    if (!isAuthenticated) 
-    {
-      navigate("/auth");
-    } else {
-      handleAddtoCart(pet?._id);
+    if (!isAuthenticated) {
+        toast.error("Please log in to adopt.");
+        navigate("/auth");
+    } else if (isPetInCart) {
+        toast.info("This pet is already in your cart.");
+    }
+    else {
+      if (pet?._id) {
+         handleAddtoCart(pet._id);
+      } else {
+         console.error("Cannot add pet to cart: Pet ID is missing.");
+         toast.error("Could not add pet: Missing ID.");
+      }
     }
   }
+
+  if (!pet) {
+      return null;
+  }
+
 
   return (
     <Card className="w-full max-w-sm mx-auto">
@@ -43,8 +62,13 @@ function ShoppingPetTile({ pet, handleGetPetDetails, handleAddtoCart })
         </CardContent>
       </div>
       <CardFooter>
-        <Button onClick={handleAdoptClick} className="w-full">
-          Adopt Now
+      <Button
+            onClick={handleAdoptClick}
+            className="w-full"
+            disabled={isPetInCart || !isAuthenticated}
+            variant={isPetInCart ? "secondary" : "default"}
+        >
+          {isAuthenticated ? (isPetInCart ? "Already in Cart" : "Adopt Now") : "Log In"}
         </Button>
       </CardFooter>
     </Card>

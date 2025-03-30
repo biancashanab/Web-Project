@@ -2,11 +2,8 @@ import Cart from "../../models/Cart.js";
 import Pet from "../../models/Pet.js";
 
 export const addToCart = async (req, res) => {
-  try 
-  {
-
-    console.log(req.body);
-    const { userId, PetId} = req.body;
+  try {
+    const { userId, PetId } = req.body;
 
     if (!userId || !PetId) {
       return res.status(400).json({
@@ -16,47 +13,90 @@ export const addToCart = async (req, res) => {
     }
 
     const pet = await Pet.findById(PetId);
-
     if (!pet) {
       return res.status(404).json({
         success: false,
-        message: "Product not found",
+        message: "Pet not found",
       });
     }
 
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {
-      cart = new Cart({ userId, items: [] });
+      cart = new Cart({ userId, items: [{ PetId }] });
+      await cart.save();
+      await cart.populate({
+        path: "items.PetId",
+        select: "image title name",
+      });
+      const populatedItems = cart.items.map((item) => ({
+          PetId: item.PetId._id,
+          image: item.PetId.image,
+          title: item.PetId.title || item.PetId.name || "N/A",
+      }));
+      return res.status(200).json({
+          success: true,
+          data: { ...cart._doc, items: populatedItems },
+      });
+
+    } else {
+      const itemExists = cart.items.some(
+        (item) => item.PetId.toString() === PetId
+      );
+
+      if (itemExists) {
+        await cart.populate({
+          path: "items.PetId",
+          select: "image title name",
+        });
+         const populatedItems = cart.items.map((item) => ({
+            PetId: item.PetId._id,
+            image: item.PetId.image,
+            title: item.PetId.title || item.PetId.name || "N/A",
+        }));
+        return res.status(200).json({
+          success: true,
+          message: "Pet is already in cart",
+          data: { ...cart._doc, items: populatedItems },
+        });
+      } else {
+        cart.items.push({ PetId });
+        await cart.save();
+        await cart.populate({
+          path: "items.PetId",
+          select: "image title name",
+        });
+        const populatedItems = cart.items.map((item) => ({
+            PetId: item.PetId._id,
+            image: item.PetId.image,
+            title: item.PetId.title || item.PetId.name || "N/A",
+        }));
+        return res.status(200).json({
+          success: true,
+          data: { ...cart._doc, items: populatedItems },
+        });
+      }
     }
-    cart.items.push({ PetId });
-    await cart.save();
-    res.status(200).json({
-      success: true,
-      data: cart,
-    });
-  } 
-  catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Error", });
+  } catch (error) {
+    console.error("Error in addToCart:", error);
+    res.status(500).json({ success: false, message: "Server Error adding to cart" });
   }
 };
 
 export const fetchCartItems = async (req, res) => {
-  try 
-  {
+  try {
     const { userId } = req.params;
 
     if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "User id is manadatory!",
+        message: "User id is mandatory!",
       });
     }
 
     const cart = await Cart.findOne({ userId }).populate({
       path: "items.PetId",
-      select: "image title",
+      select: "image title name",
     });
 
     if (!cart) {
@@ -69,103 +109,46 @@ export const fetchCartItems = async (req, res) => {
       });
     }
 
-    const validItems = cart.items.filter(
-      (petItem) => petItem.PetId
-    );
+    const validItems = cart.items.filter((petItem) => petItem.PetId);
 
     if (validItems.length < cart.items.length) {
       cart.items = validItems;
       await cart.save();
     }
 
-    const populateCartItems = validItems.map((item) => ({
+    const populatedCartItems = validItems.map((item) => ({
       PetId: item.PetId._id,
       image: item.PetId.image,
-      title: item.PetId.title,
+      title: item.PetId.name || item.PetId.title || "Pet",
     }));
 
     res.status(200).json({
       success: true,
       data: {
         ...cart._doc,
-        items: populateCartItems,
+        items: populatedCartItems,
       },
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error in fetchCartItems:", error);
     res.status(500).json({
       success: false,
-      message: "Error",
-    });
-  }
-};
-
-export const updateCartItemQty = async (req, res) => {
-  try 
-  {
-    const { userId, PetId } = req.body;
-
-    if (!userId || !PetId) {
-      return res.status(400).json({ success: false, message: "Invalid data provided!", });
-    }
-
-    const cart = await Cart.findOne({ userId });
-    if (!cart) {
-      return res.status(404).json({ success: false, message: "Cart not found!", });
-    }
-
-    const findCurrentPetIndex = cart.items.findIndex(
-      (item) => item.PetId.toString() === PetId
-    );
-
-    if (findCurrentPetIndex === -1) {
-      return res.status(404).json({ success: false, message: "Cart item not present !",});
-    }
-
-    await cart.save();
-
-    await cart.populate({
-      path: "items.PetId",
-      select: "image title price salePrice",
-    });
-
-    const populateCartItems = cart.items.map((item) => ({
-      PetId: item.PetId ? item.PetId._id : null,
-      image: item.PetId ? item.PetId.image : null,
-      title: item.PetId ? item.PetId.title : "Product not found",
-    }));
-
-    res.status(200).json({
-      success: true,
-      data: {
-        ...cart._doc,
-        items: populateCartItems,
-      },
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Error",
+      message: "Server error fetching cart items",
     });
   }
 };
 
 export const deleteCartItem = async (req, res) => {
-  try 
-  {
+  try {
     const { userId, PetId } = req.params;
     if (!userId || !PetId) {
       return res.status(400).json({
         success: false,
-        message: "Invalid data provided!",
+        message: "Invalid data provided (userId or PetId missing)!",
       });
     }
 
-    const cart = await Cart.findOne({ userId }).populate({
-      path: "items.PetId",
-      select: "image title price salePrice",
-    });
+    const cart = await Cart.findOne({ userId });
 
     if (!cart) {
       return res.status(404).json({
@@ -174,35 +157,42 @@ export const deleteCartItem = async (req, res) => {
       });
     }
 
+    const initialLength = cart.items.length;
     cart.items = cart.items.filter(
-      (item) => item.PetId._id.toString() !== PetId
+      (item) => item.PetId.toString() !== PetId
     );
 
-    await cart.save();
+    if (cart.items.length === initialLength) {
+       return res.status(404).json({
+           success: false,
+           message: "Pet not found in cart!",
+       });
+    }
 
+    await cart.save();
     await cart.populate({
       path: "items.PetId",
-      select: "image title price salePrice",
+      select: "image title name",
     });
 
-    const populateCartItems = cart.items.map((item) => ({
+    const populatedCartItems = cart.items.map((item) => ({
       PetId: item.PetId ? item.PetId._id : null,
       image: item.PetId ? item.PetId.image : null,
-      title: item.PetId ? item.PetId.title : "Product not found",
+      title: item.PetId ? (item.PetId.name || item.PetId.title || "Pet") : "Data unavailable",
     }));
 
     res.status(200).json({
       success: true,
       data: {
         ...cart._doc,
-        items: populateCartItems,
+        items: populatedCartItems,
       },
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error in deleteCartItem:", error);
     res.status(500).json({
       success: false,
-      message: "Error",
+      message: "Server error deleting cart item",
     });
   }
 };

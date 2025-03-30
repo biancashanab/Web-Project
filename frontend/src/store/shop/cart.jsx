@@ -2,67 +2,75 @@ import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const initialState = {
-  cartItems: [],
+  cartItems: { items: [] },
   isLoading: false,
-  hasOrdered: false,
+  hasOrdered: false, 
 };
 
 export const addToCart = createAsyncThunk(
   "cart/addToCart",
-  async ({ userId, PetId }) => {
-    console.log("sending:", userId, PetId);
-    const response = await axios.post(
-      "http://localhost:8080/api/shop/cart/add",
-      {
-        userId,
-        PetId,
+  async ({ userId, PetId }, { rejectWithValue }) => {
+    try {
+      console.log("Sending addToCart:", { userId, PetId }); 
+      const response = await axios.post(
+        "http://localhost:8080/api/shop/cart/add",
+        { userId, PetId }
+      );
+      console.log("addToCart response:", response.data); 
+      if (response.data && response.data.success) {
+        return response.data; 
+      } else {
+        return rejectWithValue(response.data?.message || "Failed to add item");
       }
-    );
-
-    return response.data;
+    } catch (error) {
+      console.error("addToCart error:", error.response?.data || error.message);
+      return rejectWithValue(error.response?.data?.message || error.message || "Network or server error");
+    }
   }
 );
 
+
 export const fetchCartItems = createAsyncThunk(
   "cart/fetchCartItems",
-  async (userId) => {
+  async (userId, { rejectWithValue }) => {
     if (!userId) {
-      return [];
+      return { success: true, data: { userId, items: [] } };
     }
-    const response = await axios.get(
-      `http://localhost:8080/api/shop/cart/get/${userId}`
-    );
-
-    return response.data;
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/shop/cart/get/${userId}`
+      );
+      if (response.data && response.data.success) {
+         return response.data; 
+      } else {
+         return rejectWithValue(response.data?.message || "Failed to fetch cart")
+      }
+    } catch (error) {
+       console.error("fetchCartItems error:", error.response?.data || error.message);
+       return rejectWithValue(error.response?.data?.message || "Error fetching cart items");
+    }
   }
 );
 
 export const deleteCartItem = createAsyncThunk(
   "cart/deleteCartItem",
-  async ({ userId, PetId }) => {
-    const response = await axios.delete(
-      `http://localhost:8080/api/shop/cart/${userId}/${PetId}`
-    );
-
-    return response.data;
-  }
-);
-
-export const updateCartQuantity = createAsyncThunk(
-  "cart/updateCartQuantity",
-  async ({ userId, PetId}) => {
-    console.log("sending:", userId, PetId);
-    const response = await axios.put(
-      "http://localhost:8080/api/shop/cart/update-cart",
-      {
-        userId,
-        PetId,
+  async ({ userId, PetId }, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:8080/api/shop/cart/${userId}/${PetId}`
+      );
+       if (response.data && response.data.success) {
+         return response.data; 
+      } else {
+         return rejectWithValue(response.data?.message || "Failed to delete item")
       }
-    );
-
-    return response.data;
+    } catch (error) {
+      console.error("deleteCartItem error:", error.response?.data || error.message);
+       return rejectWithValue(error.response?.data?.message || "Error deleting cart item");
+    }
   }
 );
+
 
 export const fetchOrderHistory = createAsyncThunk(
   "cart/fetchOrderHistory",
@@ -73,6 +81,7 @@ export const fetchOrderHistory = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
+       console.error("fetchOrderHistory error:", error.response?.data || error.message);
       return rejectWithValue(error.response?.data || "Error fetching order history");
     }
   }
@@ -81,7 +90,11 @@ export const fetchOrderHistory = createAsyncThunk(
 const shoppingCartSlice = createSlice({
   name: "shoppingCart",
   initialState,
-  reducers: {},
+  reducers: {
+      clearCart: (state) => {
+          state.cartItems = { items: [] };
+      }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(addToCart.pending, (state) => {
@@ -89,57 +102,57 @@ const shoppingCartSlice = createSlice({
       })
       .addCase(addToCart.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.cartItems = action.payload.data;
+        if (action.payload.success) {
+           state.cartItems = action.payload.data;
+        }
       })
-      .addCase(addToCart.rejected, (state) => {
+      .addCase(addToCart.rejected, (state, action) => {
         state.isLoading = false;
-        state.cartItems = [];
+        console.error("addToCart rejected:", action.payload || action.error.message);
       })
       .addCase(fetchCartItems.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(fetchCartItems.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.cartItems = action.payload.data;
+        if (action.payload.success) {
+            state.cartItems = action.payload.data;
+        } else {
+             state.cartItems = { items: [] }; 
+        }
       })
-      .addCase(fetchCartItems.rejected, (state) => {
+      .addCase(fetchCartItems.rejected, (state, action) => {
         state.isLoading = false;
-        state.cartItems = [];
-      })
-      .addCase(updateCartQuantity.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(updateCartQuantity.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.cartItems = action.payload.data;
-      })
-      .addCase(updateCartQuantity.rejected, (state) => {
-        state.isLoading = false;
-        state.cartItems = [];
+        state.cartItems = { items: [] };
+        console.error("fetchCartItems rejected:", action.payload || action.error.message);
       })
       .addCase(deleteCartItem.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(deleteCartItem.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.cartItems = action.payload.data;
+         if (action.payload.success) {
+            state.cartItems = action.payload.data;
+        }
       })
-      .addCase(deleteCartItem.rejected, (state) => {
+      .addCase(deleteCartItem.rejected, (state, action) => {
         state.isLoading = false;
-        state.cartItems = [];
+        console.error("deleteCartItem rejected:", action.payload || action.error.message);
       })
       .addCase(fetchOrderHistory.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(fetchOrderHistory.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.hasOrdered = action.payload.orders && action.payload.orders.length > 0;
+        state.hasOrdered = action.payload?.orders && action.payload.orders.length > 0;
       })
-      .addCase(fetchOrderHistory.rejected, (state) => {
+      .addCase(fetchOrderHistory.rejected, (state, action) => {
         state.isLoading = false;
         state.hasOrdered = false;
+         console.error("fetchOrderHistory rejected:", action.payload || action.error.message);
       });
   },
 });
 
+export const { clearCart } = shoppingCartSlice.actions;
 export default shoppingCartSlice.reducer;

@@ -8,7 +8,7 @@ function UserCartItemsContent({ cartItem })
 {
   const { user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.shopCart);
-  const { productList } = useSelector((state) => state.shopProducts);
+  const { petList } = useSelector((state) => state.shopPets);
   const dispatch = useDispatch();
 
   function handleUpdateQuantity(getCartItem, typeOfAction) 
@@ -18,13 +18,13 @@ function UserCartItemsContent({ cartItem })
 
       if (getCartItems.length) {
         const indexOfCurrentCartItem = getCartItems.findIndex(
-          (item) => item.productId === getCartItem?.productId
+          (item) => item.PetId === getCartItem?.PetId
         );
 
-        const getCurrentProductIndex = productList.findIndex(
-          (product) => product._id === getCartItem?.productId
+        const getCurrentProductIndex = petList.findIndex(
+          (product) => product._id === getCartItem?.PetId
         );
-        const getTotalStock = productList[getCurrentProductIndex].totalStock;
+        const getTotalStock = petList[getCurrentProductIndex].totalStock;
 
         console.log(getCurrentProductIndex, getTotalStock, "getTotalStock");
 
@@ -41,7 +41,7 @@ function UserCartItemsContent({ cartItem })
     dispatch(
       updateCartQuantity({
         userId: user?.id,
-        productId: getCartItem?.productId,
+        PetId: getCartItem?.PetId,
         quantity:
           typeOfAction === "plus"
             ? getCartItem?.quantity + 1
@@ -56,7 +56,7 @@ function UserCartItemsContent({ cartItem })
 
   function handleCartItemDelete(getCartItem) {
     dispatch(
-      deleteCartItem({ userId: user?.id, productId: getCartItem?.productId })
+      deleteCartItem({ userId: user?.id, PetId: getCartItem?.PetId })
     ).then((data) => {
       if (data?.payload?.success) {
         toast.success("Cart item is deleted successfully");

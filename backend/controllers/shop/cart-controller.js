@@ -4,16 +4,18 @@ import Pet from "../../models/Pet.js";
 export const addToCart = async (req, res) => {
   try 
   {
-    const { userId, petId} = req.body;
 
-    if (!userId || !petId) {
+    console.log(req.body);
+    const { userId, PetId} = req.body;
+
+    if (!userId || !PetId) {
       return res.status(400).json({
         success: false,
         message: "Invalid data provided!",
       });
     }
 
-    const pet = await Pet.findById(petId);
+    const pet = await Pet.findById(PetId);
 
     if (!pet) {
       return res.status(404).json({
@@ -27,7 +29,7 @@ export const addToCart = async (req, res) => {
     if (!cart) {
       cart = new Cart({ userId, items: [] });
     }
-
+    cart.items.push({ PetId });
     await cart.save();
     res.status(200).json({
       success: true,
@@ -53,8 +55,8 @@ export const fetchCartItems = async (req, res) => {
     }
 
     const cart = await Cart.findOne({ userId }).populate({
-      path: "items.petId",
-      select: "image title price salePrice",
+      path: "items.PetId",
+      select: "image title",
     });
 
     if (!cart) {
@@ -68,7 +70,7 @@ export const fetchCartItems = async (req, res) => {
     }
 
     const validItems = cart.items.filter(
-      (petItem) => petItem.petId
+      (petItem) => petItem.PetId
     );
 
     if (validItems.length < cart.items.length) {
@@ -77,9 +79,9 @@ export const fetchCartItems = async (req, res) => {
     }
 
     const populateCartItems = validItems.map((item) => ({
-      petId: item.petId._id,
-      image: item.petId.image,
-      title: item.petId.title,
+      PetId: item.PetId._id,
+      image: item.PetId.image,
+      title: item.PetId.title,
     }));
 
     res.status(200).json({
@@ -101,9 +103,9 @@ export const fetchCartItems = async (req, res) => {
 export const updateCartItemQty = async (req, res) => {
   try 
   {
-    const { userId, petId } = req.body;
+    const { userId, PetId } = req.body;
 
-    if (!userId || !petId) {
+    if (!userId || !PetId) {
       return res.status(400).json({ success: false, message: "Invalid data provided!", });
     }
 
@@ -113,7 +115,7 @@ export const updateCartItemQty = async (req, res) => {
     }
 
     const findCurrentPetIndex = cart.items.findIndex(
-      (item) => item.petId.toString() === petId
+      (item) => item.PetId.toString() === PetId
     );
 
     if (findCurrentPetIndex === -1) {
@@ -123,14 +125,14 @@ export const updateCartItemQty = async (req, res) => {
     await cart.save();
 
     await cart.populate({
-      path: "items.petId",
+      path: "items.PetId",
       select: "image title price salePrice",
     });
 
     const populateCartItems = cart.items.map((item) => ({
-      petId: item.petId ? item.petId._id : null,
-      image: item.petId ? item.petId.image : null,
-      title: item.petId ? item.petId.title : "Product not found",
+      PetId: item.PetId ? item.PetId._id : null,
+      image: item.PetId ? item.PetId.image : null,
+      title: item.PetId ? item.PetId.title : "Product not found",
     }));
 
     res.status(200).json({
@@ -152,8 +154,8 @@ export const updateCartItemQty = async (req, res) => {
 export const deleteCartItem = async (req, res) => {
   try 
   {
-    const { userId, petId } = req.params;
-    if (!userId || !petId) {
+    const { userId, PetId } = req.params;
+    if (!userId || !PetId) {
       return res.status(400).json({
         success: false,
         message: "Invalid data provided!",
@@ -161,7 +163,7 @@ export const deleteCartItem = async (req, res) => {
     }
 
     const cart = await Cart.findOne({ userId }).populate({
-      path: "items.petId",
+      path: "items.PetId",
       select: "image title price salePrice",
     });
 
@@ -173,20 +175,20 @@ export const deleteCartItem = async (req, res) => {
     }
 
     cart.items = cart.items.filter(
-      (item) => item.petId._id.toString() !== petId
+      (item) => item.PetId._id.toString() !== PetId
     );
 
     await cart.save();
 
     await cart.populate({
-      path: "items.petId",
+      path: "items.PetId",
       select: "image title price salePrice",
     });
 
     const populateCartItems = cart.items.map((item) => ({
-      petId: item.petId ? item.petId._id : null,
-      image: item.petId ? item.petId.image : null,
-      title: item.petId ? item.petId.title : "Product not found",
+      PetId: item.PetId ? item.PetId._id : null,
+      image: item.PetId ? item.PetId.image : null,
+      title: item.PetId ? item.PetId.title : "Product not found",
     }));
 
     res.status(200).json({

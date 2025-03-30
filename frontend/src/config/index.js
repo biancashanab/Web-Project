@@ -134,30 +134,10 @@ export const addPetFormElements = [
         path: "/shop/listing",
     },
     {
-      id: "dogs",
-      label: "Dogs",
-      path: "/shop/listing",
-    },
-    {
-      id: "cats",
-      label: "Cats",
-      path: "/shop/listing",
-    },
-    {
-      id: "fish",
-      label: "Fish",
-      path: "/shop/listing",
-    },
-    {
-        id: "rabbits",
-        label: "Rabbits",
-        path: "/shop/listing",
-      },
-    {
         id: "about",
         label: "About Us",
         path: "/shop/about",
-      },
+     },
     {
       id: "search",
       label: "Search",
@@ -209,6 +189,7 @@ export const addPetFormElements = [
         { id: "purple", label: "Purple" },
         { id: "red", label: "Red" },
         { id: "pink", label: "Pink" },
+        { id: "beige", label: "Beige" },
         { id: "multi", label: "Multi" },
         { id: "other", label: "Other" },
         ],

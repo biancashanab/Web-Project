@@ -9,15 +9,10 @@ const CartSchema = new mongoose.Schema(
     },
     items: [
       {
-        productId: {
+        PetId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
+          ref: "Pet",
           required: true,
-        },
-        quantity: {
-          type: Number,
-          required: true,
-          min: 1,
         },
       },
     ],

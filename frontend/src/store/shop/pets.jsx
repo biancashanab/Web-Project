@@ -4,7 +4,7 @@ import axios from "axios";
 const initialState = {
   isLoading: false,
   petList: [],
-  petDetails: null,
+  PetDetails: null,
 };
 
 export const fetchAllFilteredPets = createAsyncThunk(
@@ -43,7 +43,7 @@ const shoppingPetSlice = createSlice({
   initialState,
   reducers: {
     setPetDetails: (state) => {
-      state.petDetails = null;
+      state.PetDetails = null;
     },
   },
   extraReducers: (builder) => {
@@ -64,11 +64,11 @@ const shoppingPetSlice = createSlice({
       })
       .addCase(fetchPetDetails.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.petDetails = action.payload.data;
+        state.PetDetails = action.payload.data;
       })
       .addCase(fetchPetDetails.rejected, (state, action) => {
         state.isLoading = false;
-        state.petDetails = null;
+        state.PetDetails = null;
       });
   },
 });

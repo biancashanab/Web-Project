@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const AdoptionOrderSchema = new mongoose.Schema({
   userId: String,
-  petId: String,
+  PetId: String,
   petDetails: {
     name: String,
     species: String,

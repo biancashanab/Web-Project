@@ -34,7 +34,7 @@ export const createAdoptionOrder = async (req, res) => {
           item_list: {
             items: cartItems.map((item) => ({
               name: item.title,
-              sku: item.petId,
+              sku: item.PetId,
               price: item.price.toFixed(2),
               currency: "USD",
               quantity: item.quantity,
@@ -114,7 +114,7 @@ export const capturePayment = async (req, res) => {
     order.payerId = payerId;
 
     for (let item of order.cartItems) {
-      let pet = await Pet.findById(item.petId);
+      let pet = await Pet.findById(item.PetId);
 
       if (!pet) {
         return res.status(404).json({

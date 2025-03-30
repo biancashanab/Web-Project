@@ -84,7 +84,6 @@ function ShoppingListing()
 
   function handleGetPetDetails(getCurrentPetId) 
   {
-   // console.log(getCurrentPetId);
     dispatch(fetchPetDetails(getCurrentPetId));
   }
 
@@ -129,6 +128,7 @@ function ShoppingListing()
       dispatch(fetchAllFilteredPets({ filterParams: filters, sortParams: sort }));
     }
   }, [dispatch, sort, filters]);
+
   useEffect(() => {
     if (PetDetails !== null) setOpenDetailsDialog(true);
   }, [PetDetails]);
@@ -174,6 +174,7 @@ function ShoppingListing()
           {petList && petList.length > 0
             ? petList.map((PetItem) => (
                 <ShoppingPetTile
+                  key={PetItem._id} 
                   handleGetPetDetails={handleGetPetDetails}
                   pet={PetItem}
                   handleAddtoCart={handleAddtoCart}

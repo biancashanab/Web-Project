@@ -3,19 +3,18 @@ import { Button } from "../ui/button";
 import { SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import UserCartItemsContent from "./cart-items-content";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { DialogTitle} from "@radix-ui/react-dialog";
+import { DialogTitle } from "@radix-ui/react-dialog";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchOrderHistory } from "../../store/shop/cart";
 import { useEffect } from "react";
 import { createSelector } from 'reselect';
 
-function UserCartWrapper({ cartItems, setOpenCartSheet }) 
-{
+function UserCartWrapper({ cartItems, setOpenCartSheet }) {
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth); // Presupunem că ai un slice auth cu user
-  const { hasOrdered } = useSelector((state) => state.shoppingCart || { hasOrdered: false });
+  // Dacă state.shoppingCart nu este definit, extragem direct valoarea cu un fallback
+  const hasOrdered = useSelector((state) => state.shoppingCart?.hasOrdered || false);
 
   useEffect(() => {
     if (user?.id) {
@@ -25,8 +24,8 @@ function UserCartWrapper({ cartItems, setOpenCartSheet })
   
   return (
     <SheetContent className="sm:max-w-md" aria-labelledby="cart-title">
-       <VisuallyHidden>
-            <DialogTitle>Menu</DialogTitle>
+      <VisuallyHidden>
+        <DialogTitle>Menu</DialogTitle>
       </VisuallyHidden>
               
       <SheetHeader>
@@ -35,7 +34,9 @@ function UserCartWrapper({ cartItems, setOpenCartSheet })
       
       <div className="mt-8 space-y-4">
         {cartItems && cartItems.length > 0
-          ? cartItems.map((item) => <UserCartItemsContent cartItem={item} />)
+          ? cartItems.map((item) => (
+              <UserCartItemsContent key={item.id || item.PetId} cartItem={item} />
+            ))
           : null}
       </div>
       <div className="mt-8 space-y-4">
@@ -53,7 +54,6 @@ function UserCartWrapper({ cartItems, setOpenCartSheet })
         Checkout
       </Button>
     </SheetContent>
-
   );
 }
 

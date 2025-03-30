@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const SiteReviewSchema = new mongoose.Schema(
   {
-    petId: String,
+    PetId: String,
     userId: String,
     userName: String,
     reviewMessage: String,

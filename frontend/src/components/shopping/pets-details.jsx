@@ -7,10 +7,12 @@ import { setPetDetails } from "../../store/shop/pets";
 import { Separator } from "../../components/ui/separator";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { DialogTitle, DialogDescription } from "@radix-ui/react-dialog";
+import { useNavigate } from "react-router-dom";
 
 function PetDetailsDialog({ open, setOpen, PetDetails }) 
 {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const cartData = useSelector((state) => state.shopCart.cartItems);
   const cartItemsList = cartData?.items || []; 
@@ -19,7 +21,7 @@ function PetDetailsDialog({ open, setOpen, PetDetails })
 
   function handleAddToCart(getCurrentPetId) {
     if (!user?.id) {
-      toast.error("Please log in to add pets to your cart");
+      navigate("/auth");
       return;
     }
 

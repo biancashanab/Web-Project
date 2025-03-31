@@ -86,64 +86,69 @@ function MenuItems()
     }
   
     useEffect(() => {
-      dispatch(fetchCartItems(user?.id));
-    }, [dispatch]);
+      if (user?.id) {
+        dispatch(fetchCartItems(user.id));
+      }
+    }, [dispatch, user]);
   
     return (
       <div className="flex lg:items-center lg:flex-row flex-col gap-4">
-        {isAuthenticated && (
-          <Sheet open={openCartSheet} onOpenChange={() => setOpenCartSheet(false)}>
-            <Button
-              onClick={() => setOpenCartSheet(true)}
-              variant="outline"
-              size="icon"
-              className="relative"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              <span className="absolute top-[-5px] right-[2px] font-bold text-sm">
-                {cartItems?.items?.length || 0}
-              </span>
-              <span className="sr-only">User cart</span>
-            </Button>
-            <UserCartWrapper
-              setOpenCartSheet={setOpenCartSheet}
-              cartItems={
-                cartItems && cartItems.items && cartItems.items.length > 0
-                  ? cartItems.items
-                  : []
-              }
-            />
-          </Sheet>
-        )}
+        {isAuthenticated ? (
+          <>
+            <Sheet open={openCartSheet} onOpenChange={() => setOpenCartSheet(false)}>
+              <Button
+                onClick={() => setOpenCartSheet(true)}
+                variant="outline"
+                size="icon"
+                className="relative"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                <span className="absolute top-[-5px] right-[2px] font-bold text-sm">
+                  {cartItems?.items?.length || 0}
+                </span>
+                <span className="sr-only">User cart</span>
+              </Button>
+              <UserCartWrapper
+                setOpenCartSheet={setOpenCartSheet}
+                cartItems={
+                  cartItems && cartItems.items && cartItems.items.length > 0
+                    ? cartItems.items
+                    : []
+                }
+              />
+            </Sheet>
   
-        {isAuthenticated && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Avatar className="bg-grey">
-                <AvatarFallback className="bg-black text-white font-extrabold">
-                  {user?.userName ? user.userName[0].toUpperCase() : "?"}
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="right" className="w-56">
-              <DropdownMenuLabel>Logged in as {user?.userName}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/shop/account")}>
-                <UserCog className="mr-2 h-4 w-4" />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="bg-grey">
+                  <AvatarFallback className="bg-black text-white font-extrabold">
+                    {user?.userName ? user.userName[0].toUpperCase() : "?"}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="right" className="w-56">
+                <DropdownMenuLabel>Logged in as {user?.userName}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/shop/account")}>
+                  <UserCog className="mr-2 h-4 w-4" />
+                  Account
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        ) : (
+          <Button variant="outline" onClick={() => navigate("/auth")}>
+            Log In
+          </Button>
         )}
       </div>
     );
   }
-
 
 
 

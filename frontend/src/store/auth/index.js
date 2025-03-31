@@ -137,11 +137,13 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload.success ? action.payload.user : null;
         state.isAuthenticated = action.payload.success;
+        state.isTransitioning = action.payload.success; // Start transition if user is authenticated
       })
       .addCase(checkAuth.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
+        state.isTransitioning = false;
       });
   },
 });

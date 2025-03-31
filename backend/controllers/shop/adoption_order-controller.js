@@ -37,7 +37,6 @@ export const createAdoptionOrder = async (req, res) => {
               sku: item.PetId,
               price: item.price.toFixed(2),
               currency: "USD",
-              quantity: item.quantity,
             })),
           },
           amount: {
@@ -150,25 +149,18 @@ export const capturePayment = async (req, res) => {
 export const getAllAdoptionOrdersByUser = async (req, res) => {
   try {
     const { userId } = req.params;
-
     const orders = await Order.find({ userId });
 
-    if (!orders.length) {
-      return res.status(404).json({
-        success: false,
-        message: "No orders found!",
-      });
-    }
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: orders,
+      data: orders, 
+      message: orders.length ? "Orders found" : "No orders found"
     });
   } catch (e) {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };

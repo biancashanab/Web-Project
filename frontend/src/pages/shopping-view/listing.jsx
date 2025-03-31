@@ -20,6 +20,7 @@ import { ArrowUpDownIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
+import Footer from "../../components/common/footer/footer";
 
 function createSearchParamsHelper(filterParams) 
 {
@@ -135,7 +136,7 @@ function ShoppingListing()
 
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">
+    <><div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">
       <PetFilter filters={filters} handleFilter={handleFilter} />
       <div className="bg-background w-full rounded-lg shadow-sm">
         <div className="p-4 border-b flex items-center justify-between">
@@ -173,22 +174,22 @@ function ShoppingListing()
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
           {petList && petList.length > 0
             ? petList.map((PetItem) => (
-                <ShoppingPetTile
-                  key={PetItem._id} 
-                  handleGetPetDetails={handleGetPetDetails}
-                  pet={PetItem}
-                  handleAddtoCart={handleAddtoCart}
-                />
-              ))
+              <ShoppingPetTile
+                key={PetItem._id}
+                handleGetPetDetails={handleGetPetDetails}
+                pet={PetItem}
+                handleAddtoCart={handleAddtoCart} />
+            ))
             : null}
         </div>
       </div>
       <PetDetailsDialog
         open={openDetailsDialog}
         setOpen={setOpenDetailsDialog}
-        PetDetails={PetDetails}
-      />
-    </div>
+        PetDetails={PetDetails} />
+    </div><div>
+        <Footer />
+      </div></>
   );
 }
 

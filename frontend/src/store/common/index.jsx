@@ -1,49 +1,52 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const initialState = {
   isLoading: false,
-  reviews: [],
+  featureImageList: [],
 };
 
-export const addReview = createAsyncThunk(
-  "/order/addReview",
-  async (formdata) => {
-    const response = await axios.post(
-      `http://localhost:8080/api/shop/review/add`,
-      formdata
+export const getFeatureImages = createAsyncThunk(
+  "/order/getFeatureImages",
+  async () => {
+    const response = await axios.get(
+      `http://localhost:8080/api/common/feature/get`
     );
 
     return response.data;
   }
 );
 
-export const getReviews = createAsyncThunk("/order/getReviews", async (id) => {
-  const response = await axios.get(
-    `http://localhost:8080/api/shop/review/${id}`
-  );
+export const addFeatureImage = createAsyncThunk(
+  "/order/addFeatureImage",
+  async (image) => {
+    const response = await axios.post(
+      `http://localhost:8080/api/common/feature/add`,
+      { image }
+    );
 
-  return response.data;
-});
+    return response.data;
+  }
+);
 
-const reviewSlice = createSlice({
-  name: "reviewSlice",
+const commonSlice = createSlice({
+  name: "commonSlice",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getReviews.pending, (state) => {
+      .addCase(getFeatureImages.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(getReviews.fulfilled, (state, action) => {
+      .addCase(getFeatureImages.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.reviews = action.payload.data;
+        state.featureImageList = action.payload.data;
       })
-      .addCase(getReviews.rejected, (state) => {
+      .addCase(getFeatureImages.rejected, (state) => {
         state.isLoading = false;
-        state.reviews = [];
+        state.featureImageList = [];
       });
   },
 });
 
-export default reviewSlice.reducer;
+export default commonSlice.reducer;

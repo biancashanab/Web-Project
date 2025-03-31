@@ -39,18 +39,35 @@ export const capturePayment = createAsyncThunk(
 
 export const getAllOrdersByUserId = createAsyncThunk(
   "/order/getAllOrdersByUserId",
-  async (userId) => {
-    const response = await axios.get(
-      `http://localhost:8080/api/shop/order/list/${userId}`
-    );
+  async (userId, thunkAPI) => {
+    if (!userId) {
+      return thunkAPI.rejectWithValue({ error: "User ID not provided" });
+    }
 
-    return response.data;
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/shop/order/list/${userId}`
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return { data: [] };
+      }
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
   }
 );
 
+
+
 export const getOrderDetails = createAsyncThunk(
   "/order/getOrderDetails",
-  async (id) => {
+  async (id, thunkAPI) =>
+  {
+    if (!id) {
+      return thunkAPI.rejectWithValue({ error: "Order ID not provided" });
+    }
+
     const response = await axios.get(
       `http://localhost:8080/api/shop/order/details/${id}`
     );

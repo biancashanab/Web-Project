@@ -17,7 +17,7 @@ import shopAddressRouter from "./routes/shop/address-routes.js";
 import shopOrderRouter from "./routes/shop/order-routes.js";
 import shopSearchRouter from "./routes/shop/search-routes.js";
 import shopReviewRouter from "./routes/shop/review-routes.js";
-//import commonFeatureRouter from "./routes/common/feature-routes.js";
+import commonFeatureRouter from "./routes/common/feature-routes.js";
 
 // Conectare la MongoDB
 mongoose.connect(process.env.DB_URL)
@@ -55,9 +55,9 @@ app.use("/api/shop/pets", shopPetsRouter);
 app.use("/api/shop/cart", shopCartRouter);
 app.use("/api/shop/address", shopAddressRouter);
 app.use("/api/shop/order", shopOrderRouter);
-//app.use("/api/shop/search", shopSearchRouter);
+app.use("/api/shop/search", shopSearchRouter);
 app.use("/api/shop/review", shopReviewRouter);
-//app.use("/api/common/feature", commonFeatureRouter);
+app.use("/api/common/feature", commonFeatureRouter);
 
 // Ruta principala
 app.get("/",(request,response)=>{

@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { checkAuth, endTransition } from "./store/auth";
+import { checkAuth } from "./store/auth";
 import { useEffect, useState } from "react";
 import LoadingCat from "./components/common/loadingCat/loadingCat";
 import "./App.css";
@@ -8,34 +8,34 @@ import "./App.css";
 // Import components correctly based on your file structure
 import AuthLayout from "./components/auth/layout";
 import AdminLayout from "./components/admin/layout";
-import AdminDashboard from "./components/admin/dashboard";
-import AdminPets from "./components/admin/pets";
+import AdminDashboard from "./pages/admin/dashboard";
+import AdminPets from "./pages/admin/pets";
 import AdminAdoptionOrders from "./components/admin/adoption_orders";
-import AdminFeatures from "./components/admin/features";
+import AdminFeatures from "./pages/admin/features";
 import ShoppingLayout from "./components/shopping/layout";
 import NotFound from "./pages/not-found";
 import ShoppingHome from "./pages/shopping-view/home";
 import ShoppingListing from "./pages/shopping-view/listing";
 import ShoppingAccount from "./pages/shopping-view/account";
 import ShoppingCheckout from "./pages/shopping-view/checkout";
+import ShoppingAbout from "./pages/shopping-view/about";
 import CheckAuth from "./components/common/check-auth";
 import UnauthPage from "./pages/unauth-page";
 import AuthPage from "./pages/auth/AuthPage";
 import HomePage from "./pages/start/start";
-
-
-
+import SearchPets from "./pages/shopping-view/search";
+import UserManagement from "./pages/admin/users";
+import AboutManagement from "./pages/admin/about-management";
 
 function App() 
 {
-  const { user, isAuthenticated, isLoading, isTransitioning } = useSelector(
+  const { user, isAuthenticated, isLoading } = useSelector(
     (state) => state.auth
   );
   const dispatch = useDispatch();
 
   const [forcedLoading, setForcedLoading] = useState(true);
   const MINIMUM_LOADING_TIME = 1500;
-  const TRANSITION_TIME = 1500;
 
   useEffect(() => {
     dispatch(checkAuth());
@@ -47,22 +47,10 @@ function App()
     return () => clearTimeout(timer);
   }, [dispatch]);
 
-  useEffect(() => {
-    if (isTransitioning) {
-      // End transition after delay
-      const transitionTimer = setTimeout(() => {
-        dispatch(endTransition());
-      }, TRANSITION_TIME);
-
-      return () => clearTimeout(transitionTimer);
-    }
-  }, [isTransitioning, dispatch]);
-
-  if (isLoading || forcedLoading || isTransitioning) {
+  if (isLoading || forcedLoading) {
     console.log("Showing loading screen:", {
       isLoading,
       forcedLoading,
-      isTransitioning,
     });
     return <LoadingCat />;
   }
@@ -88,7 +76,6 @@ function App()
           <Route path="/auth/*" element={<Navigate to="/auth" replace />} />
         </Route>
 
-
         {/* Admin routes */}
         <Route
           path="/admin"
@@ -102,6 +89,8 @@ function App()
           <Route path="pets" element={<AdminPets />} />
           <Route path="adoption_orders" element={<AdminAdoptionOrders />} />
           <Route path="features" element={<AdminFeatures />} />
+          <Route path="about" element={<AboutManagement />} />
+          <Route path="users" element={<UserManagement />} />
         </Route>
 
         {/* Shopping routes */}
@@ -110,6 +99,8 @@ function App()
           <Route path="account" element={<ShoppingAccount />} />
           <Route path="listing" element={<ShoppingListing />} />
           <Route path="checkout" element={<ShoppingCheckout />} />
+          <Route path="about" element={<ShoppingAbout />} />
+          <Route path="search" element={<SearchPets />} />
         </Route>
 
         {/* Not found route */}

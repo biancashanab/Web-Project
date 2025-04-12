@@ -39,8 +39,15 @@ export const registerFormControls = [
     },
   ];
   
-export const addAnimalFormElements = [
-    {
+export const addPetFormElements = [
+  {
+    label: "Title",
+    name: "title",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter product title",
+  },  
+  {
       label: "Animal Name",
       name: "name",
       componentType: "input",
@@ -65,6 +72,7 @@ export const addAnimalFormElements = [
         { id: "bird", label: "Bird" },
         { id: "fish", label: "Fish" },
         { id: "reptile", label: "Reptile" },
+        { id: "hamster", label: "Hamster" },
         { id: "other", label: "Other" },
       ],
     },
@@ -86,6 +94,27 @@ export const addAnimalFormElements = [
       ],
     },
     {
+      label: "Colour",
+      name: "colour",
+      componentType: "select",
+      options: [
+        { id: "black", label: "Black" },
+        { id: "white", label: "White" },
+        { id: "brown", label: "Brown" },
+        { id: "grey", label: "Grey" },
+        { id: "orange", label: "Orange" },
+        { id: "yellow", label: "Yellow" },
+        { id: "green", label: "Green" },
+        { id: "blue", label: "Blue" },
+        { id: "purple", label: "Purple" },
+        { id: "red", label: "Red" },
+        { id: "pink", label: "Pink" },
+        { id: "beige", label: "Beige" },
+        { id: "multi", label: "Multi" },
+        { id: "other", label: "Other" },
+      ],
+    },
+    {
       label: "Description",
       name: "description",
       componentType: "textarea",
@@ -102,33 +131,13 @@ export const addAnimalFormElements = [
     {
         id: "adopt",
         label: "Adopt",
-        path: "/shop/adopt",
-    },
-    {
-      id: "dogs",
-      label: "Dogs",
-      path: "/shop/listing",
-    },
-    {
-      id: "cats",
-      label: "Cats",
-      path: "/shop/listing",
-    },
-    {
-      id: "fish",
-      label: "Fish",
-      path: "/shop/listing",
-    },
-    {
-        id: "rabbits",
-        label: "Rabbits",
         path: "/shop/listing",
-      },
+    },
     {
         id: "about",
         label: "About Us",
-        path: "/about",
-      },
+        path: "/shop/about",
+     },
     {
       id: "search",
       label: "Search",
@@ -168,7 +177,7 @@ export const addAnimalFormElements = [
         { id: "adult", label: "Adult" },
         { id: "senior", label: "Senior" },
       ],
-      coloures: [
+      colours: [
         { id: "black", label: "Black" },
         { id: "white", label: "White" },
         { id: "brown", label: "Brown" },
@@ -180,14 +189,15 @@ export const addAnimalFormElements = [
         { id: "purple", label: "Purple" },
         { id: "red", label: "Red" },
         { id: "pink", label: "Pink" },
+        { id: "beige", label: "Beige" },
         { id: "multi", label: "Multi" },
         { id: "other", label: "Other" },
         ],
   };
   
   export const sortOptions = [
-    { id: "price-lowtohigh", label: "Price: Low to High" },
-    { id: "price-hightolow", label: "Price: High to Low" },
+    { id: "age-lowtohigh", label: "Age: Low to High" },
+    { id: "age-hightolow", label: "Age: High to Low" },
     { id: "title-atoz", label: "Title: A to Z" },
     { id: "title-ztoa", label: "Title: Z to A" },
   ];
@@ -226,5 +236,128 @@ export const addAnimalFormElements = [
       name: "notes",
       componentType: "textarea",
       placeholder: "Enter any additional notes",
+    },
+  ];
+
+  export const accountFormControls = [
+    {
+      category: "Basic Information",
+      fields: [
+        {
+          label: "Username",
+          name: "userName",
+          componentType: "input",
+          type: "text",
+          placeholder: "Enter your username",
+        },
+        {
+          label: "Email",
+          name: "email",
+          componentType: "input",
+          type: "email",
+          placeholder: "Enter your email",
+        }
+      ]
+    },
+    {
+      category: "Personal Information",
+      fields: [
+        {
+          label: "Full Name",
+          name: "fullName",
+          componentType: "input",
+          type: "text",
+          placeholder: "Enter your full name",
+        },
+        {
+          label: "Gender",
+          name: "gender",
+          componentType: "select",
+          options: [
+            { id: "male", label: "Male" },
+            { id: "female", label: "Female" },
+            { id: "other", label: "Other" },
+            { id: "prefer_not_to_say", label: "Prefer not to say" }
+          ],
+        },
+        {
+          label: "Date of Birth",
+          name: "dateOfBirth",
+          componentType: "input",
+          type: "date",
+          placeholder: "Select your date of birth",
+        },
+        {
+          label: "Phone Number",
+          name: "phoneNumber",
+          componentType: "input",
+          type: "tel",
+          placeholder: "Enter your phone number",
+        }
+      ]
+    },
+    {
+      category: "Password",
+      fields: [
+        {
+          label: "Current Password",
+          name: "currentPassword",
+          componentType: "input",
+          type: "password",
+          placeholder: "Enter your current password",
+        },
+        {
+          label: "New Password",
+          name: "newPassword",
+          componentType: "input",
+          type: "password",
+          placeholder: "Enter your new password",
+        },
+        {
+          label: "Confirm New Password",
+          name: "confirmPassword",
+          componentType: "input",
+          type: "password",
+          placeholder: "Confirm your new password",
+        }
+      ]
+    }
+  ];
+
+  export const adoptionFormControls = [
+    {
+      name: "livingSituation",
+      label: "Describe your living situation (house/apartment, owned/rented)",
+      placeholder: "Ex: Rented apartment, 2 rooms",
+      componentType: "textarea", // Use textarea for longer descriptions
+      required: true, // Mark fields as required if necessary
+    },
+    {
+      name: "hasFence",
+      label: "Do you have a safely fenced yard?",
+      placeholder: "Yes / No / Not applicable",
+      componentType: "text",
+      required: true,
+    },
+    {
+      name: "petExperience",
+      label: "What experience do you have with similar pets?",
+      placeholder: "Describe previous experience",
+      componentType: "textarea",
+      required: true,
+    },
+    {
+      name: "vetNamePhone",
+      label: "Name and phone number of your current/previous vet (if applicable)",
+      placeholder: "Ex: Dr. Smith, 07xx xxx xxx",
+      componentType: "text",
+      required: false, // Make optional if needed
+    },
+    {
+      name: "reasonForAdoption",
+      label: "Why do you want to adopt this pet/these pets?",
+      placeholder: "Reason for adoption",
+      componentType: "textarea",
+      required: true,
     },
   ];

@@ -87,6 +87,35 @@ export const fetchOrderHistory = createAsyncThunk(
   }
 );
 
+export const clearCartFromDatabase = createAsyncThunk(
+  "cart/clearCartFromDatabase",
+  async (userId, { rejectWithValue }) => {
+    if (!userId) {
+      console.error("clearCartFromDatabase: userId is missing");
+      return rejectWithValue("User ID is required");
+    }
+    try {
+      console.log(`Attempting to clear cart for user ID: ${userId} via API`);
+      const response = await axios.post(
+        "http://localhost:8080/api/shop/cart/clear",
+        { userId }
+      );
+
+      console.log("Clear cart API response:", response.data);
+      
+      if (response.data && response.data.success) {
+        return response.data; 
+      } else {
+        return rejectWithValue(response.data?.message || "Failed to clear cart via API");
+      }
+    } 
+    catch (error) {
+      console.error("clearCartFromDatabase Axios error:", error.response?.data || error.message);
+      return rejectWithValue(error.response?.data?.message || error.message || "Network or server error during cart clear");
+    }
+  }
+);
+
 const shoppingCartSlice = createSlice({
   name: "shoppingCart",
   initialState,
@@ -150,6 +179,19 @@ const shoppingCartSlice = createSlice({
         state.isLoading = false;
         state.hasOrdered = false;
          console.error("fetchOrderHistory rejected:", action.payload || action.error.message);
+      })
+      .addCase(clearCartFromDatabase.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(clearCartFromDatabase.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload.success) {
+          state.cartItems = { items: [] };
+        }
+      })
+      .addCase(clearCartFromDatabase.rejected, (state, action) => {
+        state.isLoading = false;
+        console.error("clearCartFromDatabase rejected:", action.payload || action.error.message);
       });
   },
 });

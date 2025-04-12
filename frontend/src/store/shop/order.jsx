@@ -1,132 +1,119 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 
 const initialState = {
-  approvalURL: null,
-  isLoading: false,
-  orderId: null,
-  orderList: [],
-  orderDetails: null,
+    orderList: [],
+    orderDetails: null,
+    isLoading: false,
+    error: null,
 };
 
-export const createNewOrder = createAsyncThunk(
-  "/order/createNewOrder",
-  async (orderData) => {
-    const response = await axios.post(
-      "http://localhost:8080/api/shop/order/create",
-      orderData
-    );
+export const submitAdoptionApplication = createAsyncThunk(
+    'order/submitAdoptionApplication',
+    async (applicationData, { rejectWithValue }) => {
+        try {
+            const response = await axios.post(
+                'http://localhost:8080/api/shop/order/submit-application', 
+                applicationData
+            );
 
-    return response.data;
-  }
-);
-
-export const capturePayment = createAsyncThunk(
-  "/order/capturePayment",
-  async ({ paymentId, payerId, orderId }) => {
-    const response = await axios.post(
-      "http://localhost:8080/api/shop/order/capture",
-      {
-        paymentId,
-        payerId,
-        orderId,
-      }
-    );
-
-    return response.data;
-  }
+            return response.data;
+        } catch (error) {
+            console.error("Error in submitAdoptionApplication thunk:", error.response?.data || error.message);
+            return rejectWithValue(error.response?.data || { message: 'Network error or server unreachable' });
+        }
+    }
 );
 
 export const getAllOrdersByUserId = createAsyncThunk(
-  "/order/getAllOrdersByUserId",
-  async (userId, thunkAPI) => {
-    if (!userId) {
-      return thunkAPI.rejectWithValue({ error: "User ID not provided" });
+    'order/getAllOrdersByUserId',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/api/shop/order/list/${userId}`);
+            return response.data; 
+        } catch (error) {
+             console.error("Error in getAllOrdersByUserId thunk:", error.response?.data || error.message);
+            return rejectWithValue(error.response?.data || { message: 'Network error or server unreachable' });
+        }
     }
-
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/api/shop/order/list/${userId}`
-      );
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        return { data: [] };
-      }
-      return thunkAPI.rejectWithValue(error.response.data);
-    }
-  }
 );
-
-
 
 export const getOrderDetails = createAsyncThunk(
-  "/order/getOrderDetails",
-  async (id, thunkAPI) =>
-  {
-    if (!id) {
-      return thunkAPI.rejectWithValue({ error: "Order ID not provided" });
+    'order/getOrderDetails',
+    async (orderId, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/api/shop/order/details/${orderId}`);
+            return response.data; 
+        } catch (error) {
+             console.error("Error in getOrderDetails thunk:", error.response?.data || error.message);
+            return rejectWithValue(error.response?.data || { message: 'Network error or server unreachable' });
+        }
     }
-
-    const response = await axios.get(
-      `http://localhost:8080/api/shop/order/details/${id}`
-    );
-
-    return response.data;
-  }
 );
 
-const shoppingOrderSlice = createSlice({
-  name: "shoppingOrderSlice",
-  initialState,
-  reducers: {
-    resetOrderDetails: (state) => {
-      state.orderDetails = null;
+const orderSlice = createSlice({
+    name: 'shopOrder',
+    initialState,
+    reducers: {
+        resetOrderDetails: (state) => {
+            state.orderDetails = null;
+            state.error = null;
+        },
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(createNewOrder.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(createNewOrder.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.approvalURL = action.payload.approvalURL;
-        state.orderId = action.payload.orderId;
-        sessionStorage.setItem(
-          "currentOrderId",
-          JSON.stringify(action.payload.orderId)
-        );
-      })
-      .addCase(createNewOrder.rejected, (state) => {
-        state.isLoading = false;
-        state.approvalURL = null;
-        state.orderId = null;
-      })
-      .addCase(getAllOrdersByUserId.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(getAllOrdersByUserId.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.orderList = action.payload.data;
-      })
-      .addCase(getAllOrdersByUserId.rejected, (state) => {
-        state.isLoading = false;
-        state.orderList = [];
-      })
-      .addCase(getOrderDetails.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(getOrderDetails.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.orderDetails = action.payload.data;
-      })
-      .addCase(getOrderDetails.rejected, (state) => {
-        state.isLoading = false;
-        state.orderDetails = null;
-      });
-  },
+    extraReducers: (builder) => {
+        builder
+            .addCase(submitAdoptionApplication.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(submitAdoptionApplication.fulfilled, (state, action) => {
+                state.isLoading = false;
+            })
+            .addCase(submitAdoptionApplication.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload?.message || 'Failed to submit application.';
+            })
+
+            .addCase(getAllOrdersByUserId.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getAllOrdersByUserId.fulfilled, (state, action) => {
+                state.isLoading = false;
+                if (action.payload?.success) {
+                    state.orderList = action.payload.data;
+                } else {
+                    state.orderList = [];
+                    state.error = action.payload?.message || 'Failed to fetch orders.';
+                }
+            })
+            .addCase(getAllOrdersByUserId.rejected, (state, action) => {
+                state.isLoading = false;
+                state.orderList = [];
+                state.error = action.payload?.message || 'Failed to fetch orders.';
+            })
+
+             .addCase(getOrderDetails.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+                state.orderDetails = null; 
+            })
+            .addCase(getOrderDetails.fulfilled, (state, action) => {
+                state.isLoading = false;
+                 if (action.payload?.success) {
+                    state.orderDetails = action.payload.data;
+                } else {
+                    state.orderDetails = null;
+                    state.error = action.payload?.message || 'Failed to fetch order details.';
+                }
+            })
+            .addCase(getOrderDetails.rejected, (state, action) => {
+                state.isLoading = false;
+                state.orderDetails = null;
+                 state.error = action.payload?.message || 'Failed to fetch order details.';
+            });
+    },
 });
 
-export const { resetOrderDetails } = shoppingOrderSlice.actions;
-export default shoppingOrderSlice.reducer;
+export const { resetOrderDetails } = orderSlice.actions;
+export default orderSlice.reducer;

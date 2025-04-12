@@ -6,30 +6,48 @@ export const searchPets = async (req, res) => {
     const { keyword } = req.params;
     if (!keyword || typeof keyword !== "string") {
       return res.status(400).json({
-        succes: false,
+        success: false,
         message: "Keyword is required and must be in string format",
       });
     }
 
-    const regEx = new RegExp(keyword, "i");
+    // Create a case-insensitive regex pattern
+    const searchPattern = new RegExp(keyword, "i");
 
-    const createSearchQuery = {
+    // Create a more comprehensive search query
+    const searchQuery = {
       $or: [
-        { title: regEx },
-        { description: regEx },
-        { species: regEx },
-        { breed: regEx },
-      ],
+        { title: searchPattern },
+        { name: searchPattern },
+        { description: searchPattern },
+        { species: searchPattern },
+        { breed: searchPattern },
+        { colour: searchPattern },
+        { size: searchPattern }
+      ]
     };
 
-    const searchResults = await Pet.find(createSearchQuery);
+    // Find pets matching the search criteria
+    const searchResults = await Pet.find(searchQuery)
+      .sort({ createdAt: -1 }); // Sort by newest first
 
-    res.status(200).json({ success: true, data: searchResults, });
+    // Log the search results for debugging
+    console.log(`Search results for "${keyword}":`, searchResults.length);
+
+    res.status(200).json({ 
+      success: true, 
+      data: searchResults,
+      count: searchResults.length
+    });
   } 
   catch (error) 
   {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Error",});
+    console.error("Search error:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error searching pets",
+      error: error.message 
+    });
   }
 };
 

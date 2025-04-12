@@ -7,7 +7,7 @@ import {
 import accVideo from "../../assets/account.mp4";
 import Address from "../../components/shopping/address";
 import ShoppingOrders from "../../components/shopping/adoption_orders";
-import Footer from "../../components/common/footer/footer";
+import AccountInfo from "../../components/shopping/account-info";
 
 function ShoppingAccount() 
 {
@@ -25,11 +25,15 @@ function ShoppingAccount()
       </div>
 
       <div className="flex flex-col rounded-lg border bg-background p-6 shadow-sm">
-        <Tabs defaultValue="orders">
+        <Tabs defaultValue="account">
           <TabsList>
+            <TabsTrigger value="account">Account Information</TabsTrigger>
             <TabsTrigger value="orders">Adoption Orders</TabsTrigger>
             <TabsTrigger value="address">Address</TabsTrigger>
           </TabsList>
+          <TabsContent value="account">
+            <AccountInfo />
+          </TabsContent>
           <TabsContent value="orders">
             <ShoppingOrders />
           </TabsContent>
@@ -37,9 +41,6 @@ function ShoppingAccount()
             <Address />
           </TabsContent>
         </Tabs>
-      </div>
-      <div>
-        <Footer />
       </div>
     </div>
     

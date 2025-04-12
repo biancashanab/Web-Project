@@ -110,7 +110,7 @@ function AdminPets()
         {petList && petList.length > 0
           ? petList.map((petItem) => (
               <AdminPetTile
-                key={petItem.id} 
+                key={petItem._id} 
                 setFormData={setFormData}
                 setOpenCreatePetsDialog={setOpenCreatePetsDialog}
                 setCurrentEditedId={setCurrentEditedId}

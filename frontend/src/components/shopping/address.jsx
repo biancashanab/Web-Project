@@ -28,10 +28,12 @@ function Address({ setCurrentSelectedAddress, selectedId })
   const { user } = useSelector((state) => state.auth);
   const { addressList } = useSelector((state) => state.shopAddress);
 
-  function handleManageAddress(event) {
+  function handleManageAddress(event) 
+  {
     event.preventDefault();
 
-    if (addressList.length >= 3 && currentEditedId === null) {
+    if (addressList.length >= 3 && currentEditedId === null) 
+    {
       setFormData(initialAddressFormData);
       toast.error("You can add max 3 addresses");
       return;
@@ -66,7 +68,8 @@ function Address({ setCurrentSelectedAddress, selectedId })
         });
   }
 
-  function handleDeleteAddress(getCurrentAddress) {
+  function handleDeleteAddress(getCurrentAddress) 
+  {
     dispatch(
       deleteAddress({ userId: user?.id, addressId: getCurrentAddress._id })
     ).then((data) => {
@@ -77,7 +80,8 @@ function Address({ setCurrentSelectedAddress, selectedId })
     });
   }
 
-  function handleEditAddress(getCuurentAddress) {
+  function handleEditAddress(getCuurentAddress) 
+  {
     setCurrentEditedId(getCuurentAddress?._id);
     setFormData({
       ...formData,
@@ -89,7 +93,8 @@ function Address({ setCurrentSelectedAddress, selectedId })
     });
   }
 
-  function isFormValid() {
+  function isFormValid() 
+  {
     return Object.keys(formData)
       .map((key) => formData[key].trim() !== "")
       .every((item) => item);
@@ -102,7 +107,7 @@ function Address({ setCurrentSelectedAddress, selectedId })
   console.log(addressList, "addressList");
 
   return (
-    <Card>
+    <Card  className="w-full">
       <div className="mb-5 p-3 grid grid-cols-1 sm:grid-cols-2  gap-2">
         {addressList && addressList.length > 0
           ? addressList.map((singleAddressItem) => (
@@ -122,8 +127,8 @@ function Address({ setCurrentSelectedAddress, selectedId })
           {currentEditedId !== null ? "Edit Address" : "Add New Address"}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <CommonForm
+      <CardContent className="space-y-10">
+        <CommonForm style={{ width: "100%" }}
           formControls={addressFormControls}
           formData={formData}
           setFormData={setFormData}

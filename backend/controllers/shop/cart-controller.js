@@ -196,3 +196,40 @@ export const deleteCartItem = async (req, res) => {
     });
   }
 };
+
+export const clearCart = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    console.log(`Backend clearCart: Attempting for userId: ${userId}`); // Log entry
+
+    if (!userId || userId === 'undefined') {
+       console.error("Backend clearCart Error: Invalid User ID received:", userId); // Log specific validation failure
+       return res.status(400).json({ success: false, message: "Valid User ID is required!" });
+    }
+
+    const cartUpdateResult = await Cart.updateOne(
+      { userId: userId },
+      { $set: { items: [] } }
+    );
+    console.log(`Backend clearCart: Update result for userId ${userId}:`, cartUpdateResult); // Log DB result
+    if (cartUpdateResult.matchedCount === 0) {
+         return res.status(200).json({
+            success: true,
+            message: "Cart not found, considered clear.",
+            data: { userId, items: [], _id: null },
+        });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Cart cleared successfully",
+      data: { userId, items: [], _id: cartUpdateResult.upsertedId || null },
+    });
+  } catch (error) {
+    console.error(`Backend clearCart EXCEPTION for userId ${req.body?.userId}:`, error); 
+    res.status(500).json({
+      success: false,
+      message: "Server error clearing cart",
+    });
+  }
+};

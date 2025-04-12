@@ -1,194 +1,110 @@
-import paypal from "../../helpers/paypal.js";
-import Order from "../../models/AdoptionOrder.js";
-import Cart from "../../models/Cart.js";
-import Pet from "../../models/Pet.js";
+import AdoptionOrder from "../../models/AdoptionOrder.js";
+import User from "../../models/User.js"; 
 
-export const createAdoptionOrder = async (req, res) => {
-  try {
-    const {
-      userId,
-      cartItems,
-      addressInfo,
-      orderStatus,
-      paymentMethod,
-      paymentStatus,
-      totalAmount,
-      orderDate,
-      orderUpdateDate,
-      paymentId,
-      payerId,
-      cartId,
-    } = req.body;
+export const submitAdoptionApplication = async (req, res) => {
+    try {
+        const {
+            userId,
+            pets,
+            addressInfo,
+            applicationDetails,
+            totalAmount,
+            paymentMethod
+        } = req.body;
 
-    const create_payment_json = {
-      intent: "sale",
-      payer: {
-        payment_method: "paypal",
-      },
-      redirect_urls: {
-        return_url: "http://localhost:5173/shop/paypal-return",
-        cancel_url: "http://localhost:5173/shop/paypal-cancel",
-      },
-      transactions: [
-        {
-          item_list: {
-            items: cartItems.map((item) => ({
-              name: item.title,
-              sku: item.PetId,
-              price: item.price.toFixed(2),
-              currency: "USD",
-            })),
-          },
-          amount: {
-            currency: "USD",
-            total: totalAmount.toFixed(2),
-          },
-          description: "description",
-        },
-      ],
-    };
+        if (!userId || !pets || pets.length === 0 || !addressInfo || !applicationDetails) {
+            return res.status(400).json({ success: false, message: "Missing required application data." });
+        }
 
-    paypal.payment.create(create_payment_json, async (error, paymentInfo) => {
-      if (error) {
-        console.log(error);
+        const user = await User.findById(userId).select('userName email');
+        if (!user) {
+             return res.status(404).json({ success: false, message: "User not found." });
+        }
 
-        return res.status(500).json({
-          success: false,
-          message: "Error while creating paypal payment",
-        });
-      } else {
-        const newlyCreatedOrder = new Order({
-          userId,
-          cartId,
-          cartItems,
-          addressInfo,
-          orderStatus,
-          paymentMethod,
-          paymentStatus,
-          totalAmount,
-          orderDate,
-          orderUpdateDate,
-          paymentId,
-          payerId,
+        const newApplication = new AdoptionOrder({
+            userId,
+            pets,
+            adopterInfo: {
+                ...addressInfo,
+                fullName: user.userName,
+                email: user.email,
+            },
+            applicationDetails,
+            adoptionStatus: 'pending_review',
+            adoptionFee: totalAmount || 0,
+            paymentStatus: totalAmount > 0 ? 'pending' : 'not_applicable',
+            paymentMethod: paymentMethod || null,
+            adoptionDate: new Date(),
+            lastUpdated: new Date(),
         });
 
-        await newlyCreatedOrder.save();
-
-        const approvalURL = paymentInfo.links.find(
-          (link) => link.rel === "approval_url"
-        ).href;
+        await newApplication.save();
 
         res.status(201).json({
-          success: true,
-          approvalURL,
-          orderId: newlyCreatedOrder._id,
+            success: true,
+            message: "Adoption application submitted successfully.",
+            data: newApplication,
         });
-      }
-    });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({
-      success: false,
-      message: "Some error occured!",
-    });
-  }
-};
 
-export const capturePayment = async (req, res) => {
-  try {
-    const { paymentId, payerId, orderId } = req.body;
-
-    let order = await Order.findById(orderId);
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order can not be found",
-      });
-    }
-
-    order.paymentStatus = "paid";
-    order.orderStatus = "confirmed";
-    order.paymentId = paymentId;
-    order.payerId = payerId;
-
-    for (let item of order.cartItems) {
-      let pet = await Pet.findById(item.PetId);
-
-      if (!pet) {
-        return res.status(404).json({
-          success: false,
-          message: `Not enough stock for this pet ${pet.title}`,
+    } catch (e) {
+        console.error("Error submitting adoption application:", e);
+        res.status(500).json({
+            success: false,
+            message: "Server error occurred while submitting application.",
         });
-      }
-
-      pet.totalStock -= item.quantity;
-
-      await pet.save();
     }
-
-    const getCartId = order.cartId;
-    await Cart.findByIdAndDelete(getCartId);
-
-    await order.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Order confirmed",
-      data: order,
-    });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({
-      success: false,
-      message: "Some error occured!",
-    });
-  }
 };
 
 export const getAllAdoptionOrdersByUser = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const orders = await Order.find({ userId });
+    try {
+        const { userId } = req.params;
+        if (!userId || userId === 'undefined') {
+            return res.status(400).json({ success: false, message: "Valid User ID is required." });
+        }
 
-    return res.status(200).json({
-      success: true,
-      data: orders, 
-      message: orders.length ? "Orders found" : "No orders found"
-    });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({
-      success: false,
-      message: "Some error occurred!",
-    });
-  }
+        const orders = await AdoptionOrder.find({ userId }).sort({ adoptionDate: -1 });
+
+        return res.status(200).json({
+            success: true,
+            data: orders,
+            message: orders.length ? "Orders found" : "No adoption history found."
+        });
+    } catch (e) {
+        console.error("Error fetching user adoption orders:", e);
+        res.status(500).json({
+            success: false,
+            message: "Server error occurred fetching adoption history.",
+        });
+    }
 };
 
 export const getAdoptionOrderDetails = async (req, res) => {
-  try {
-    const { id } = req.params;
+    try {
+        const { id } = req.params;
+        if (!id || id === 'undefined') {
+             return res.status(400).json({ success: false, message: "Valid Order ID is required." });
+        }
 
-    const order = await Order.findById(id);
+        const order = await AdoptionOrder.findById(id).populate('userId', 'userName email');
 
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found!",
-      });
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Adoption record not found!",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: order,
+        });
+    } catch (e) {
+        console.error("Error fetching adoption order details:", e);
+        res.status(500).json({
+            success: false,
+            message: "Server error occurred fetching details.",
+        });
     }
-
-    res.status(200).json({
-      success: true,
-      data: order,
-    });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({
-      success: false,
-      message: "Some error occured!",
-    });
-  }
 };
 
 export const getOrderHistory = async (req, res) => {
@@ -199,7 +115,7 @@ export const getOrderHistory = async (req, res) => {
       return res.status(400).json({ success: false, message: "User ID is required" });
     }
 
-    const orders = await Order.find({ userId }); // Presupunem un model Order
+    const orders = await Order.find({ userId });
     res.status(200).json({ success: true, orders });
   } catch (error) {
     console.log(error);

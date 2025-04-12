@@ -238,3 +238,126 @@ export const addPetFormElements = [
       placeholder: "Enter any additional notes",
     },
   ];
+
+  export const accountFormControls = [
+    {
+      category: "Basic Information",
+      fields: [
+        {
+          label: "Username",
+          name: "userName",
+          componentType: "input",
+          type: "text",
+          placeholder: "Enter your username",
+        },
+        {
+          label: "Email",
+          name: "email",
+          componentType: "input",
+          type: "email",
+          placeholder: "Enter your email",
+        }
+      ]
+    },
+    {
+      category: "Personal Information",
+      fields: [
+        {
+          label: "Full Name",
+          name: "fullName",
+          componentType: "input",
+          type: "text",
+          placeholder: "Enter your full name",
+        },
+        {
+          label: "Gender",
+          name: "gender",
+          componentType: "select",
+          options: [
+            { id: "male", label: "Male" },
+            { id: "female", label: "Female" },
+            { id: "other", label: "Other" },
+            { id: "prefer_not_to_say", label: "Prefer not to say" }
+          ],
+        },
+        {
+          label: "Date of Birth",
+          name: "dateOfBirth",
+          componentType: "input",
+          type: "date",
+          placeholder: "Select your date of birth",
+        },
+        {
+          label: "Phone Number",
+          name: "phoneNumber",
+          componentType: "input",
+          type: "tel",
+          placeholder: "Enter your phone number",
+        }
+      ]
+    },
+    {
+      category: "Password",
+      fields: [
+        {
+          label: "Current Password",
+          name: "currentPassword",
+          componentType: "input",
+          type: "password",
+          placeholder: "Enter your current password",
+        },
+        {
+          label: "New Password",
+          name: "newPassword",
+          componentType: "input",
+          type: "password",
+          placeholder: "Enter your new password",
+        },
+        {
+          label: "Confirm New Password",
+          name: "confirmPassword",
+          componentType: "input",
+          type: "password",
+          placeholder: "Confirm your new password",
+        }
+      ]
+    }
+  ];
+
+  export const adoptionFormControls = [
+    {
+      name: "livingSituation",
+      label: "Describe your living situation (house/apartment, owned/rented)",
+      placeholder: "Ex: Rented apartment, 2 rooms",
+      componentType: "textarea", // Use textarea for longer descriptions
+      required: true, // Mark fields as required if necessary
+    },
+    {
+      name: "hasFence",
+      label: "Do you have a safely fenced yard?",
+      placeholder: "Yes / No / Not applicable",
+      componentType: "text",
+      required: true,
+    },
+    {
+      name: "petExperience",
+      label: "What experience do you have with similar pets?",
+      placeholder: "Describe previous experience",
+      componentType: "textarea",
+      required: true,
+    },
+    {
+      name: "vetNamePhone",
+      label: "Name and phone number of your current/previous vet (if applicable)",
+      placeholder: "Ex: Dr. Smith, 07xx xxx xxx",
+      componentType: "text",
+      required: false, // Make optional if needed
+    },
+    {
+      name: "reasonForAdoption",
+      label: "Why do you want to adopt this pet/these pets?",
+      placeholder: "Reason for adoption",
+      componentType: "textarea",
+      required: true,
+    },
+  ];

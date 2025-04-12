@@ -18,6 +18,26 @@ const UserSchema = new mongoose.Schema({
       required: true,
     },
 
+    fullName: {
+      type: String,
+      default: "",
+    },
+
+    gender: {
+      type: String,
+      default: "",
+    },
+
+    dateOfBirth: {
+      type: Date,
+      default: null,
+    },
+
+    phoneNumber: {
+      type: String,
+      default: "",
+    },
+
     role: {
       type: String,
       default: "user",

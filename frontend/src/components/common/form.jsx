@@ -100,6 +100,7 @@ function CommonForm({
                 [getControlItem.name]: event.target.value,
               })
             }
+            className="w-full" 
           />
         );
         break;
@@ -109,19 +110,28 @@ function CommonForm({
   }
 
   return (
-    <form onSubmit={onSubmit}>
-      <div className="flex flex-col gap-3">
+    <div>
+      <div className="flex flex-col gap-3 w-full">
         {formControls.map((controlItem) => (
           <div className="grid w-full gap-1.5" key={controlItem.name}>
             <Label className="mb-1">{controlItem.label}</Label>
-            {renderInputsByComponentType(controlItem)}
+            <div className="w-full">
+              {renderInputsByComponentType(controlItem)}
+            </div>
           </div>
         ))}
       </div>
-      <Button disabled={isBtnDisabled} type="submit" className="mt-2 w-full">
-        {buttonText || "Submit"}
-      </Button>
-    </form>
+      {onSubmit && (
+        <Button 
+          onClick={onSubmit} 
+          disabled={isBtnDisabled} 
+          type="button" 
+          className="mt-2 w-full"
+        >
+          {buttonText || "Submit"}
+        </Button>
+      )}
+    </div>
   );
 }
 

@@ -20,7 +20,6 @@ import { ArrowUpDownIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
-import Footer from "../../components/common/footer/footer";
 
 function createSearchParamsHelper(filterParams) 
 {
@@ -136,7 +135,7 @@ function ShoppingListing()
 
   
   return (
-    <><div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">
+    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">
       <PetFilter filters={filters} handleFilter={handleFilter} />
       <div className="bg-background w-full rounded-lg shadow-sm">
         <div className="p-4 border-b flex items-center justify-between">
@@ -187,9 +186,7 @@ function ShoppingListing()
         open={openDetailsDialog}
         setOpen={setOpenDetailsDialog}
         PetDetails={PetDetails} />
-    </div><div>
-        <Footer />
-      </div></>
+    </div>
   );
 }
 

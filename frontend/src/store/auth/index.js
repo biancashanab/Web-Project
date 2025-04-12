@@ -58,6 +58,22 @@ export const checkAuth = createAsyncThunk(
   }
 );
 
+export const updateUser = createAsyncThunk(
+  "/auth/update-user",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(
+        "http://localhost:8080/api/auth/update-user",
+        formData,
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { success: false });
+    }
+  }
+);
+
 // Helper action to set the transitioning state
 export const setTransitioning = (isTransitioning) => ({
   type: 'auth/setTransitioningState',
@@ -144,6 +160,19 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
         state.isTransitioning = false;
+      })
+      // Update User
+      .addCase(updateUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload.success) {
+          state.user = action.payload.user;
+        }
+      })
+      .addCase(updateUser.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });

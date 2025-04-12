@@ -95,7 +95,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
       <Footer />
      
     </div>

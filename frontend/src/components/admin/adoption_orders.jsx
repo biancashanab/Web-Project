@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import AdminOrderDetailsView from "./order-details";
+import AdminAdoptionApplicationDetailsView from "./order-details";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllOrdersForAdmin,
@@ -18,92 +18,150 @@ import {
   resetOrderDetails,
 } from "../../store/admin/adoption_order";
 import { Badge } from "../ui/badge";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { DialogTitle } from '@radix-ui/react-dialog';
+import { Loader2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 
+const filterStatuses = ['all', 'pending_review', 'approved', 'rejected', 'completed', 'cancelled'];
+const statusLabels = {
+    all: 'All',
+    pending_review: 'Pending',
+    pending: 'Pending',
+    approved: 'Approved', 
+    rejected: 'Rejected',
+    completed: 'Completed',
+    cancelled: 'Cancelled'
+};
 
 function AdminAdoptionOrders() 
 {
-  const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
-  const { orderList, orderDetails } = useSelector((state) => state.adminAdoptionOrder);
+  const [openDialogId, setOpenDialogId] = useState(null);
+  const [activeTab, setActiveTab] = useState('all');
+  const { orderList, orderDetails, isLoading, error } = useSelector((state) => state.adminAdoptionOrder);
   const dispatch = useDispatch();
 
-  function handleFetchOrderDetails(getId) {
-    dispatch(getOrderDetailsForAdmin(getId));
+  function handleFetchOrderDetails(getId) 
+  {
+     if (!getId) 
+      return;
+     setOpenDialogId(getId);
+     dispatch(getOrderDetailsForAdmin(getId));
+  }
+
+  function handleCloseDialog() 
+  {
+      setOpenDialogId(null);
+      dispatch(resetOrderDetails());
   }
 
   useEffect(() => {
     dispatch(getAllOrdersForAdmin());
   }, [dispatch]);
 
-  console.log(orderDetails, "orderList");
-
-  useEffect(() => {
-    if (orderDetails !== null) setOpenDetailsDialog(true);
-  }, [orderDetails]);
+  const filteredList = orderList?.filter(order => {
+      if (activeTab === 'all') return true;
+      if (activeTab === 'pending_review') {
+          return order.adoptionStatus === 'pending_review' || order.adoptionStatus === 'pending';
+      }
+      return order.adoptionStatus === activeTab;
+  });
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>All Adoption Orders</CardTitle>
+        <CardTitle>Adoption Applications</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Order Date</TableHead>
-              <TableHead>Order Status</TableHead>
-              <TableHead>Order Taxes</TableHead>
-              <TableHead>
-                <span className="sr-only">Details</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orderList && orderList.length > 0
-              ? orderList.map((orderItem) => (
-                  <TableRow>
-                    <TableCell>{orderItem?._id}</TableCell>
-                    <TableCell>{orderItem?.orderDate.split("T")[0]}</TableCell>
-                    <TableCell>
-                      <Badge
-                        className={`py-1 px-3 ${
-                          orderItem?.orderStatus === "confirmed"
-                            ? "bg-green-500"
-                            : orderItem?.orderStatus === "rejected"
-                            ? "bg-red-600"
-                            : "bg-black"
-                        }`}
-                      >
-                        {orderItem?.orderStatus}
-                      </Badge>
+         <Tabs
+            defaultValue="all"
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full mb-4"
+         >
+             <TabsList className="flex justify-center flex-wrap gap-2">
+                {filterStatuses.map(status => (
+                     <TabsTrigger key={status} value={status}>
+                        {statusLabels[status] || status}
+                     </TabsTrigger>
+                ))}
+             </TabsList>
+         </Tabs>
+
+         {error && <p className="text-red-500 text-center mb-4">Error: {error}</p>}
+
+         <Table>
+           <TableHeader>
+             <TableRow>
+               <TableHead className="text-center">Application ID</TableHead>
+               <TableHead className="text-center">Application Date</TableHead>
+               <TableHead className="text-center">Applicant</TableHead>
+               <TableHead className="text-center">Application Status</TableHead>
+               <TableHead className="text-center">Adoption Fee</TableHead>
+               <TableHead className="text-right">Actions</TableHead>
+             </TableRow>
+           </TableHeader>
+           <TableBody>
+             {isLoading && (
+                 <TableRow>
+                    <TableCell colSpan={6} className="text-center h-24">
+                       <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                     </TableCell>
-                    <TableCell>${orderItem?.totalAmount}</TableCell>
-                    <TableCell>
-                      <Dialog
-                        open={openDetailsDialog}
-                        onOpenChange={() => {
-                          setOpenDetailsDialog(false);
-                          dispatch(resetOrderDetails());
-                        }}
-                      >
-                          <DialogTitle as={VisuallyHidden}>Your Order Details</DialogTitle>
-                        <Button
-                          onClick={() =>
-                            handleFetchOrderDetails(orderItem?._id)
-                          }
-                        >
-                          View Details
-                        </Button>
-                        <AdminOrderDetailsView orderDetails={orderDetails} />
-                      </Dialog>
+                 </TableRow>
+             )}
+             {!isLoading && filteredList.length === 0 && !error && (
+                 <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground h-24">
+                       {orderList.length === 0 ? "No applications found." : `No applications found for status: "${statusLabels[activeTab] || activeTab}".`}
                     </TableCell>
-                  </TableRow>
-                ))
-              : null}
-          </TableBody>
-        </Table>
+                 </TableRow>
+             )}
+             {!isLoading && filteredList?.map((orderItem) => (
+               <TableRow key={orderItem._id}>
+                  <TableCell className="font-medium truncate max-w-[150px]">{orderItem?._id}</TableCell>
+                  <TableCell>{new Date(orderItem?.adoptionDate).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                      {orderItem?.userId?.userName || 'N/A'} <br/>
+                      <span className="text-xs text-muted-foreground">{orderItem?.userId?.email || ''}</span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                        className={
+                           orderItem?.adoptionStatus === "approved" ? "bg-green-500 hover:bg-green-600" :
+                           orderItem?.adoptionStatus === "rejected" ? "bg-red-500 hover:bg-red-600" :
+                           orderItem?.adoptionStatus === "completed" ? "bg-blue-500 hover:bg-blue-600" :
+                           orderItem?.adoptionStatus === "pending_review" || orderItem?.adoptionStatus === "pending" ? "bg-yellow-500 hover:bg-yellow-600" :
+                           orderItem?.adoptionStatus === "cancelled" ? "bg-gray-500 hover:bg-gray-600" :
+                           "bg-secondary hover:bg-secondary/80"
+                        }
+                    >
+                      {statusLabels[orderItem?.adoptionStatus] || orderItem?.adoptionStatus}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>${(orderItem?.adoptionFee || 0).toFixed(2)}</TableCell>
+                  <TableCell className="text-right">
+                    <Dialog
+                      open={openDialogId === orderItem._id}
+                      onOpenChange={(isOpen) => { if (!isOpen) handleCloseDialog(); }}
+                    >
+                      <Button
+                         variant="outline"
+                         size="sm"
+                         onClick={() => handleFetchOrderDetails(orderItem?._id)}
+                         disabled={isLoading && openDialogId === orderItem._id}
+                      >
+                        Details
+                      </Button>
+                      {openDialogId === orderItem._id && (
+                          <AdminAdoptionApplicationDetailsView
+                              orderDetails={orderDetails?._id === orderItem._id ? orderDetails : null}
+                              onClose={handleCloseDialog}
+                          />
+                      )}
+                    </Dialog>
+                  </TableCell>
+                </TableRow>
+              ))}
+           </TableBody>
+         </Table>
       </CardContent>
     </Card>
   );

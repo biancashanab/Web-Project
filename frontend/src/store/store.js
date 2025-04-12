@@ -3,6 +3,7 @@ import authReducer from "./auth";
 import AdminPetsSlice from "./admin/pets";
 import AdminOrderSlice from "./admin/adoption_order";
 import adminStatsReducer from "./admin/stats";
+import adminUsersReducer from "./admin/users";
 
 import shopPetsSlice from "./shop/pets";
 import shopCartSlice from "./shop/cart";
@@ -19,6 +20,7 @@ const store = configureStore({
       adminPets: AdminPetsSlice,
       adminAdoptionOrder: AdminOrderSlice,
       adminStats: adminStatsReducer,
+      adminUsers: adminUsersReducer,
 
       shopPets: shopPetsSlice,
       shopCart: shopCartSlice,

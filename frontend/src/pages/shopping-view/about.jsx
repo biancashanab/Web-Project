@@ -1,15 +1,48 @@
 import { useState, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, Edit2, Save, X } from "lucide-react";
 import fallbackImage from "../../assets/adopt.jpg";
+import loadingCatImage from "../../components/common/loadingCat/loadingCat";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 
-function ShoppingAbout() {
+const api = axios.create({
+  baseURL: 'http://localhost:8080/api',
+  withCredentials: true // This is important for handling cookies
+});
+
+function ShoppingAbout() 
+{
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isReviewPaused, setIsReviewPaused] = useState(false);
+  const [content, setContent] = useState({
+    mission: "",
+    goal: "",
+    aboutUs: "",
+    welcome: "",
+    whatWeDo: [],
+    petCareGuides: [],
+    userReviews: [],
+    quote: {
+      text: "",
+      author: ""
+    }
+  });
+  const [loading, setLoading] = useState(true);
+  const [editingSection, setEditingSection] = useState(null);
+  const [editContent, setEditContent] = useState("");
+  const [error, setError] = useState(null);
   const slideInterval = useRef(null);
   const reviewInterval = useRef(null);
+  const successStoriesRef = useRef(null);
+  const location = useLocation();
   
+  // Get user from Redux store
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const isAdmin = user?.role === 'admin';
+
   const petCards = [
     {
       id: 1,
@@ -194,7 +227,63 @@ function ShoppingAbout() {
     }
   };
 
+  const fetchContent = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/admin/about/content');
+      if (response.data.success) {
+        setContent(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching content:', error);
+      setError('Failed to load content');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (section, currentContent) => {
+    if (!isAdmin) return; // Only allow editing for admin users
+    setEditingSection(section);
+    setEditContent(currentContent);
+  };
+
+  const handleSave = async (section) => {
+    if (!isAdmin) return; // Only allow saving for admin users
+    
+    try {
+      const updatedContent = {
+        ...content,
+        [section]: editContent
+      };
+
+      const response = await api.put('/admin/about/update', updatedContent);
+      
+      if (response.data.success) {
+        setContent(response.data.data);
+        setEditingSection(null);
+        setEditContent("");
+        setError(null);
+      }
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError('Please log in to edit content.');
+      } else if (err.response?.status === 403) {
+        setError('You do not have permission to edit this content.');
+      } else {
+        setError('Failed to update content. Please try again later.');
+      }
+      console.error('Error updating content:', err);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingSection(null);
+    setEditContent("");
+  };
+
   useEffect(() => {
+    fetchContent();
     startSlideShow();
     startReviewSlideShow();
     return () => {
@@ -203,20 +292,93 @@ function ShoppingAbout() {
     };
   }, [isPaused, isReviewPaused]);
 
+  // Improved scroll handling
+  useEffect(() => {
+    const scrollToSection = () => {
+      if (location.hash === '#success-stories' && successStoriesRef.current) {
+        setTimeout(() => {
+          successStoriesRef.current.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }, 1000);
+      }
+    };
+
+    // Scroll on initial load and when location changes
+    scrollToSection();
+  }, [location]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <img 
+            src={loadingCatImage} 
+            alt="Loading..." 
+            className="w-32 h-32 object-contain"
+          />
+          <p className="mt-4 text-lg text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
+
       {/* Hero Section with split design */}
       <div className="flex flex-col md:flex-row">
         <div className="bg-orange-200 w-full md:w-1/2 p-8 md:p-16 flex items-center">
           <div>
-            <h1 className="text-4xl font-bold mb-4 text-white">Welcome to Pet Adopt</h1>
+            {editingSection === 'welcome' ? (
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded text-black"
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                />
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleSave('welcome')}
+                    className="bg-green-500 text-white px-4 py-2 rounded flex items-center"
+                  >
+                    <Save className="w-4 h-4 mr-2" /> Save
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    className="bg-red-500 text-white px-4 py-2 rounded flex items-center"
+                  >
+                    <X className="w-4 h-4 mr-2" /> Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="relative group">
+                <h1 className="text-4xl font-bold mb-4 text-white">Welcome to Pet Adopt</h1>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleEdit('welcome', content.welcome)}
+                    className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Edit2 className="w-5 h-5 text-white hover:text-gray-200" />
+                  </button>
+                )}
+              </div>
+            )}
             <p className="text-xl text-white">
-              A safe space and platform to help animals find loving forever homes and support responsible pet ownership.
+              {content.welcome}
             </p>
           </div>
         </div>
         <div className="w-full md:w-1/2 bg-cover bg-center h-60 md:h-[500px]">
-          <img 
+          <img
             src={fallbackImage}
             alt="Pet adoption"
             className="w-full h-full object-cover"
@@ -232,15 +394,42 @@ function ShoppingAbout() {
           </div>
         </div>
         <div className="bg-white w-full md:w-3/4 p-8 md:p-16">
-          <p className="mb-4">
-            Since 2010, Pet Adopt has been helping animals find the loves they need to live through mental, physical, medical challenges, and more with support and empowering them to follow their dreams.
-          </p>
-          <p className="mb-4">
-            We help them embark on a journey of finding their true families by organizing events that educate potential owners about animal welfare. These resources and events are a mix of gift-in-kind and free. There are also signature events that happen every year such as #WoofWeek, Home Class for a Cure, and #TreatsYourself!
-          </p>
-          <p>
-            These signature events are led by expert speakers who share tips and stories about adoption success and speak about fair animal treatment followed by hands-on games, activities, and panel conversations. And, of course, there's wine and delicious appetizers.
-          </p>
+          {editingSection === 'aboutUs' ? (
+            <div className="space-y-4">
+              <textarea
+                className="w-full p-2 border rounded"
+                rows="6"
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+              />
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleSave('aboutUs')}
+                  className="bg-green-500 text-white px-4 py-2 rounded flex items-center"
+                >
+                  <Save className="w-4 h-4 mr-2" /> Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="bg-red-500 text-white px-4 py-2 rounded flex items-center"
+                >
+                  <X className="w-4 h-4 mr-2" /> Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="relative group">
+              <p className="mb-4">{content.aboutUs}</p>
+              {isAdmin && (
+                <button
+                  onClick={() => handleEdit('aboutUs', content.aboutUs)}
+                  className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Edit2 className="w-5 h-5 text-gray-500 hover:text-gray-700" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -248,30 +437,88 @@ function ShoppingAbout() {
       <div className="flex flex-col md:flex-row">
         <div className="w-full md:w-3/4 p-8 md:p-16">
           <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
-          <p className="mb-4">
-            Founded in 2010, Pet Adopt is dedicated to finding loving homes for abandoned, 
-            neglected, and rescued animals. Our organization works tirelessly to rescue pets 
-            from shelters with high euthanasia rates, abusive situations, and other 
-            dangerous environments.
-          </p>
-          <p>
-            We believe that every animal deserves a chance at a happy, healthy life with 
-            a family who loves them. Through our network of volunteers, foster homes, and 
-            veterinary partners, we've helped over 5,000 animals find their forever homes.
-          </p>
+          {editingSection === 'mission' ? (
+            <div className="space-y-4">
+              <textarea
+                className="w-full p-2 border rounded"
+                rows="6"
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+              />
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleSave('mission')}
+                  className="bg-green-500 text-white px-4 py-2 rounded flex items-center"
+                >
+                  <Save className="w-4 h-4 mr-2" /> Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="bg-red-500 text-white px-4 py-2 rounded flex items-center"
+                >
+                  <X className="w-4 h-4 mr-2" /> Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="relative group">
+              <p className="mb-4">{content.mission}</p>
+              {isAdmin && (
+                <button
+                  onClick={() => handleEdit('mission', content.mission)}
+                  className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Edit2 className="w-5 h-5 text-gray-500 hover:text-gray-700" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
         <div className="bg-pink-200 w-full md:w-1/4">
           {/* Empty colored block */}
         </div>
       </div>
 
-      {/* Blue section with text */}
+      {/* Goal Section */}
       <div className="bg-rose-200 text-white p-8 md:p-16">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold mb-6">Our Goal</h2>
-          <p className="text-lg">
-            Our goal is to encourage and motivate the everyday human by giving all the tools to overcome everyday challenges and reach their true potential in having their own furry friend. By helping one another, humans can transform not only our pets but the world.
-          </p>
+          {editingSection === 'goal' ? (
+            <div className="space-y-4">
+              <textarea
+                className="w-full p-2 border rounded text-black"
+                rows="4"
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+              />
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleSave('goal')}
+                  className="bg-green-500 text-white px-4 py-2 rounded flex items-center"
+                >
+                  <Save className="w-4 h-4 mr-2" /> Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="bg-red-500 text-white px-4 py-2 rounded flex items-center"
+                >
+                  <X className="w-4 h-4 mr-2" /> Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="relative group">
+              <p className="text-lg">{content.goal}</p>
+              {isAdmin && (
+                <button
+                  onClick={() => handleEdit('goal', content.goal)}
+                  className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Edit2 className="w-5 h-5 text-white hover:text-gray-200" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -279,35 +526,47 @@ function ShoppingAbout() {
       <div className="p-8 md:p-16">
         <h2 className="text-3xl font-bold mb-8 text-center">What We Do</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white shadow-md p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-3">Animal Rescue</h3>
-            <p>
-              We work with local shelters, animal control agencies, and individuals to rescue 
-              animals in need. Each animal receives necessary veterinary care, proper nutrition, 
-              and behavioral assessment before being placed for adoption.
-            </p>
-          </div>
-          <div className="bg-white shadow-md p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-3">Adoption Services</h3>
-            <p>
-              Our thorough adoption process ensures that each animal is matched with the right family. 
-              We consider lifestyle, living situation, and experience to make successful matches.
-            </p>
-          </div>
-          <div className="bg-white shadow-md p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-3">Education</h3>
-            <p>
-              We educate the public about responsible pet ownership, spaying/neutering, 
-              and the importance of adoption versus purchasing from breeders or pet stores.
-            </p>
-          </div>
-          <div className="bg-white shadow-md p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-3">Community Outreach</h3>
-            <p>
-              Through events, social media, and partnerships with local businesses, 
-              we raise awareness about animal welfare issues and promote adoption.
-            </p>
-          </div>
+          {content.whatWeDo.map((item, index) => (
+            <div key={index} className="bg-white shadow-md p-6 rounded-lg relative group">
+              <h3 className="text-xl font-bold mb-3">{item.title}</h3>
+              {editingSection === `what-we-do-${index}` ? (
+                <div className="space-y-4">
+                  <textarea
+                    className="w-full p-2 border rounded"
+                    rows="4"
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                  />
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleSave(`what-we-do-${index}`)}
+                      className="bg-green-500 text-white px-4 py-2 rounded flex items-center"
+                    >
+                      <Save className="w-4 h-4 mr-2" /> Save
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      className="bg-red-500 text-white px-4 py-2 rounded flex items-center"
+                    >
+                      <X className="w-4 h-4 mr-2" /> Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p>{item.description}</p>
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleEdit(`what-we-do-${index}`, item.description)}
+                      className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Edit2 className="w-5 h-5 text-gray-500 hover:text-gray-700" />
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -376,7 +635,7 @@ function ShoppingAbout() {
       </div>
 
       {/* Reviews Section */}
-      <div className="bg-orange-50 p-8 md:p-16">
+      <div ref={successStoriesRef} id="success-stories" className="bg-orange-50 p-8 md:p-16">
         <h2 className="text-3xl font-bold mb-8 text-center">Adoption Success Stories</h2>
         
         <div className="relative max-w-4xl mx-auto">
@@ -447,8 +706,8 @@ function ShoppingAbout() {
       {/* Quote Section */}
       <div className="p-8 md:p-16 text-center">
         <blockquote className="text-2xl font-light italic max-w-3xl mx-auto">
-          "The greatness of a nation and its moral progress can be judged by the way its animals are treated."
-          <footer className="mt-4 text-gray-600">— Mahatma Gandhi</footer>
+          "{content.quote.text}"
+          <footer className="mt-4 text-gray-600">— {content.quote.author}</footer>
         </blockquote>
       </div>
     </div>

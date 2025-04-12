@@ -19,7 +19,9 @@ import shopSearchRouter from "./routes/shop/search-routes.js";
 import shopReviewRouter from "./routes/shop/review-routes.js";
 import commonFeatureRouter from "./routes/common/feature-routes.js";
 import adminStatsRoutes from './routes/admin/stats-routes.js';
-import adminUserRoutes from './routes/admin/user-routes.js'; 
+import adminUserRoutes from './routes/admin/user-routes.js';
+import adminAboutRouter from './routes/admin/about-routes.js';
+import publicAboutRouter from './routes/common/about-routes.js';
 
 // Conectare la MongoDB
 mongoose.connect(process.env.DB_URL)
@@ -62,6 +64,8 @@ app.use("/api/shop/review", shopReviewRouter);
 app.use("/api/common/feature", commonFeatureRouter);
 app.use('/api/admin/stats', adminStatsRoutes);
 app.use('/api/admin/users', adminUserRoutes);
+app.use('/api/admin/about', adminAboutRouter);
+app.use('/api/about', publicAboutRouter);
 
 // Ruta principala
 app.get("/",(request,response)=>{

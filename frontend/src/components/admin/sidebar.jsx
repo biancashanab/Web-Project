@@ -3,6 +3,8 @@ import {
   ChartNoAxesCombined,
   LayoutDashboard,
   Cat,
+  Users,
+  FileText,
 } from "lucide-react";
 import { Fragment, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -19,17 +21,29 @@ const adminSidebarMenuItems = [
       icon: <LayoutDashboard />,
   },
   {
+    id: "orders",
+    label: "Adoption Orders",
+    path: "/admin/adoption_orders",
+    icon: <BadgeCheck />,
+    notificationId: 'pendingApplications'
+},
+  {
       id: "pets",
       label: "Pets",
       path: "/admin/pets",
       icon: <Cat />,
   },
   {
-      id: "orders",
-      label: "Adoption Orders",
-      path: "/admin/adoption_orders",
-      icon: <BadgeCheck />,
-      notificationId: 'pendingApplications'
+      id: "users",
+      label: "Users",
+      path: "/admin/users",
+      icon: <Users />,
+  },
+  {
+      id: "about",
+      label: "About Page",
+      path: "/admin/about",
+      icon: <FileText />,
   },
 ];
 

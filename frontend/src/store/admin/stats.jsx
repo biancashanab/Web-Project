@@ -16,13 +16,34 @@ export const fetchDashboardStats = createAsyncThunk(
     'adminStats/fetchDashboardStats',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axios.get('/api/admin/stats/dashboard'); // Use relative path if proxy is set up, or full URL
+            console.log("[DEBUG] Starting dashboard stats fetch...");
+            console.log("[DEBUG] Making request to: http://localhost:8080/api/admin/stats/dashboard");
+            
+            const response = await axios.get('http://localhost:8080/api/admin/stats/dashboard', {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true // Adăugăm acest parametru pentru a include cookie-urile
+            });
+            
+            console.log("[DEBUG] Raw API Response:", response);
+            console.log("[DEBUG] Response status:", response.status);
+            console.log("[DEBUG] Response data:", response.data);
+            
             if (response.data && response.data.success) {
+                console.log("[DEBUG] Successfully fetched stats:", response.data.data);
                 return response.data.data;
             } else {
+                console.log("[DEBUG] API returned unsuccessful response:", response.data);
                 return rejectWithValue(response.data?.message || 'Failed to fetch stats');
             }
         } catch (error) {
+            console.error("[DEBUG] Error details:", {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                headers: error.response?.headers
+            });
             return rejectWithValue(error.response?.data?.message || error.message || 'Network error fetching stats');
         }
     }
@@ -39,18 +60,19 @@ const adminStatsSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(fetchDashboardStats.pending, (state) => {
+                console.log("[DEBUG] Stats fetch pending...");
                 state.isLoading = true;
                 state.error = null;
             })
             .addCase(fetchDashboardStats.fulfilled, (state, action) => {
+                console.log("[DEBUG] Stats fetch fulfilled with data:", action.payload);
                 state.isLoading = false;
                 state.stats = action.payload;
             })
             .addCase(fetchDashboardStats.rejected, (state, action) => {
+                console.log("[DEBUG] Stats fetch rejected with error:", action.payload);
                 state.isLoading = false;
                 state.error = action.payload || 'Failed to load dashboard stats.';
-                // Optionally reset stats to initial state on error
-                // state.stats = initialState.stats;
             });
     }
 });

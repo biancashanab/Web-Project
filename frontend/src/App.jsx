@@ -24,6 +24,8 @@ import UnauthPage from "./pages/unauth-page";
 import AuthPage from "./pages/auth/AuthPage";
 import HomePage from "./pages/start/start";
 import SearchPets from "./pages/shopping-view/search";
+import UserManagement from "./pages/admin/users";
+import AboutManagement from "./pages/admin/about-management";
 
 function App() 
 {
@@ -87,6 +89,8 @@ function App()
           <Route path="pets" element={<AdminPets />} />
           <Route path="adoption_orders" element={<AdminAdoptionOrders />} />
           <Route path="features" element={<AdminFeatures />} />
+          <Route path="about" element={<AboutManagement />} />
+          <Route path="users" element={<UserManagement />} />
         </Route>
 
         {/* Shopping routes */}

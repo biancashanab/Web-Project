@@ -15,7 +15,7 @@ Built with React, Redux, Node.js, MongoDB, Vite and Tailwind CSS, following mode
 ## Features
 
 - User Authentication & Authorization
-- Admin Dashboard for managing pets and adoption applications
+- Admin Dashboard for managing pets, adoption applications, users and contact messages  
 - Shopping/Browse view for potential adopters
 - Pet listings with search and filter capabilities
 - Adoption application system
@@ -28,7 +28,7 @@ Built with React, Redux, Node.js, MongoDB, Vite and Tailwind CSS, following mode
 - React 19
 - Vite for build tooling and development
 - Redux Toolkit for state management
-- React Router v7 for navigation
+- React Router for navigation
 - Tailwind CSS for styling
 - shadcn/ui component library
 - React Hook Form for form handling
@@ -140,17 +140,15 @@ Built with React, Redux, Node.js, MongoDB, Vite and Tailwind CSS, following mode
 ### Admin
 - GET/POST `/api/admin/pets` - Manage pets
 - GET/POST `/api/admin/orders` - Manage adoption orders
+- GET/POST `/api/admin/messages` - Manage contact messages
 
 ### Shop
 - GET `/api/shop/pets` - Get pet listings
 - GET `/api/shop/search` - Search pets
 - POST `/api/shop/order` - Create adoption order
 - GET/POST `/api/shop/review` - Manage reviews
+- GET `/api/shop/about` - Get about section content
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request
+### Common
+- GET/POST `/api/common/contact` - Contact form submissions
+- GET `/api/common/stats` - Platform statistics

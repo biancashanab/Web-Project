@@ -8,7 +8,7 @@ import "./App.css";
 // Import components correctly based on your file structure
 import AuthLayout from "./components/auth/layout";
 import AdminLayout from "./components/admin/layout";
-import AdminDashboard from "./pages/admin/dashboard";
+import AdminDashboard from "./pages/admin/dashboard/dashboard";
 import AdminPets from "./pages/admin/pets";
 import AdminAdoptionOrders from "./components/admin/adoption_orders";
 import AdminFeatures from "./pages/admin/features";
@@ -26,6 +26,8 @@ import HomePage from "./pages/start/start";
 import SearchPets from "./pages/shopping-view/search";
 import UserManagement from "./pages/admin/users";
 import AboutManagement from "./pages/admin/about-management";
+import ContactPage from "./pages/contact/contact";
+import ContactMessages from "./components/admin/contact-messages";
 
 function App() 
 {
@@ -91,6 +93,7 @@ function App()
           <Route path="features" element={<AdminFeatures />} />
           <Route path="about" element={<AboutManagement />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="messages" element={<ContactMessages />} />
         </Route>
 
         {/* Shopping routes */}
@@ -102,6 +105,9 @@ function App()
           <Route path="about" element={<ShoppingAbout />} />
           <Route path="search" element={<SearchPets />} />
         </Route>
+
+        {/* Contact route */}
+        <Route path="/contact" element={<ContactPage />} />
 
         {/* Not found route */}
         <Route path="*" element={<NotFound />} />

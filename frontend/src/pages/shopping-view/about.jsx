@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, Star, Edit2, Save, X } from "lucide-react";
 import fallbackImage from "../../assets/adopt.jpg";
-import loadingCatImage from "../../components/common/loadingCat/loadingCat";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import LoadingCat from "../../components/common/loadingCat/loadingCat";
+import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
-
-const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  withCredentials: true // This is important for handling cookies
-});
+import { 
+  fetchContent, 
+  updateContent, 
+  setEditingSection, 
+  cancelEditing, 
+  clearError 
+} from "../../store/shop/about";
 
 function ShoppingAbout() 
 {
@@ -17,31 +18,24 @@ function ShoppingAbout()
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isReviewPaused, setIsReviewPaused] = useState(false);
-  const [content, setContent] = useState({
-    mission: "",
-    goal: "",
-    aboutUs: "",
-    welcome: "",
-    whatWeDo: [],
-    petCareGuides: [],
-    userReviews: [],
-    quote: {
-      text: "",
-      author: ""
-    }
-  });
-  const [loading, setLoading] = useState(true);
-  const [editingSection, setEditingSection] = useState(null);
-  const [editContent, setEditContent] = useState("");
-  const [error, setError] = useState(null);
   const slideInterval = useRef(null);
   const reviewInterval = useRef(null);
   const successStoriesRef = useRef(null);
   const location = useLocation();
+  const dispatch = useDispatch();
   
   // Get user from Redux store
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const isAdmin = user?.role === 'admin';
+
+  // Get state from about store
+  const { 
+    content, 
+    loading, 
+    error, 
+    editingSection, 
+    editContent
+  } = useSelector((state) => state.shopAbout);
 
   const petCards = [
     {
@@ -227,63 +221,22 @@ function ShoppingAbout()
     }
   };
 
-  const fetchContent = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get('/admin/about/content');
-      if (response.data.success) {
-        setContent(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching content:', error);
-      setError('Failed to load content');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleEdit = (section, currentContent) => {
-    if (!isAdmin) return; // Only allow editing for admin users
-    setEditingSection(section);
-    setEditContent(currentContent);
+    if (!isAdmin) return;
+    dispatch(setEditingSection({ section, content: currentContent }));
   };
 
   const handleSave = async (section) => {
-    if (!isAdmin) return; // Only allow saving for admin users
-    
-    try {
-      const updatedContent = {
-        ...content,
-        [section]: editContent
-      };
-
-      const response = await api.put('/admin/about/update', updatedContent);
-      
-      if (response.data.success) {
-        setContent(response.data.data);
-        setEditingSection(null);
-        setEditContent("");
-        setError(null);
-      }
-    } catch (err) {
-      if (err.response?.status === 401) {
-        setError('Please log in to edit content.');
-      } else if (err.response?.status === 403) {
-        setError('You do not have permission to edit this content.');
-      } else {
-        setError('Failed to update content. Please try again later.');
-      }
-      console.error('Error updating content:', err);
-    }
+    if (!isAdmin) return;
+    await dispatch(updateContent({ section, newContent: editContent }));
   };
 
   const handleCancel = () => {
-    setEditingSection(null);
-    setEditContent("");
+    dispatch(cancelEditing());
   };
 
   useEffect(() => {
-    fetchContent();
+    dispatch(fetchContent());
     startSlideShow();
     startReviewSlideShow();
     return () => {
@@ -305,7 +258,6 @@ function ShoppingAbout()
       }
     };
 
-    // Scroll on initial load and when location changes
     scrollToSection();
   }, [location]);
 
@@ -313,11 +265,7 @@ function ShoppingAbout()
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center">
-          <img 
-            src={loadingCatImage} 
-            alt="Loading..." 
-            className="w-32 h-32 object-contain"
-          />
+          <LoadingCat />
           <p className="mt-4 text-lg text-gray-600">Loading...</p>
         </div>
       </div>
@@ -342,7 +290,7 @@ function ShoppingAbout()
                   type="text"
                   className="w-full p-2 border rounded text-black"
                   value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
+                  onChange={(e) => dispatch(setEditingSection({ section: 'welcome', content: e.target.value }))}
                 />
                 <div className="flex space-x-2">
                   <button
@@ -400,7 +348,7 @@ function ShoppingAbout()
                 className="w-full p-2 border rounded"
                 rows="6"
                 value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
+                onChange={(e) => dispatch(setEditingSection({ section: 'aboutUs', content: e.target.value }))}
               />
               <div className="flex space-x-2">
                 <button
@@ -443,7 +391,7 @@ function ShoppingAbout()
                 className="w-full p-2 border rounded"
                 rows="6"
                 value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
+                onChange={(e) => dispatch(setEditingSection({ section: 'mission', content: e.target.value }))}
               />
               <div className="flex space-x-2">
                 <button
@@ -489,7 +437,7 @@ function ShoppingAbout()
                 className="w-full p-2 border rounded text-black"
                 rows="4"
                 value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
+                onChange={(e) => dispatch(setEditingSection({ section: 'goal', content: e.target.value }))}
               />
               <div className="flex space-x-2">
                 <button
@@ -535,7 +483,7 @@ function ShoppingAbout()
                     className="w-full p-2 border rounded"
                     rows="4"
                     value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
+                    onChange={(e) => dispatch(setEditingSection({ section: `what-we-do-${index}`, content: e.target.value }))}
                   />
                   <div className="flex space-x-2">
                     <button

@@ -1,17 +1,20 @@
 import {
   BadgeCheck,
-  ChartNoAxesCombined,
+  ShieldUser,
   LayoutDashboard,
   Cat,
   Users,
   FileText,
+  MessageSquare,
 } from "lucide-react";
 import { Fragment, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
-import { Badge } from "../ui/badge";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../../ui/sheet";
+import { Badge } from "../../ui/badge";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllOrdersForAdmin } from "../../store/admin/adoption_order";
+import { getAllOrdersForAdmin } from "../../../store/admin/adoption_order";
+import { fetchMessages } from "../../../store/contact";
+import './sidebar.css';
 
 const adminSidebarMenuItems = [
   {
@@ -40,6 +43,13 @@ const adminSidebarMenuItems = [
       icon: <Users />,
   },
   {
+      id: "messages",
+      label: "Contact Messages",
+      path: "/admin/messages",
+      icon: <MessageSquare />,
+      notificationId: 'pendingMessages'
+  },
+  {
       id: "about",
       label: "About Page",
       path: "/admin/about",
@@ -49,23 +59,33 @@ const adminSidebarMenuItems = [
 
 function MenuItems({ setOpen }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { orderList } = useSelector((state) => state.adminAdoptionOrder);
+  const { messages } = useSelector((state) => state.contactMessages);
 
   const pendingCount = orderList?.filter(
       order => order.adoptionStatus === 'pending_review' || order.adoptionStatus === 'pending'
+  ).length || 0;
+
+  const pendingMessagesCount = messages?.filter(
+      message => message.status === 'pending'
   ).length || 0;
 
   const getNotificationCount = (id) => {
       if (id === 'pendingApplications') {
           return pendingCount;
       }
+      if (id === 'pendingMessages') {
+          return pendingMessagesCount;
+      }
       return 0;
   };
 
   return (
-      <nav className="mt-8 flex-col flex gap-2">
+      <nav className="mt-8 flex-col flex gap-3">
           {adminSidebarMenuItems.map((menuItem) => {
               const notificationCount = getNotificationCount(menuItem.notificationId);
+              const isActive = location.pathname === menuItem.path;
 
               return (
                   <div
@@ -76,16 +96,19 @@ function MenuItems({ setOpen }) {
                               setOpen(false);
                           }
                       }}
-                      className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      className={`admin-sidebar menu-item flex cursor-pointer items-center justify-between gap-2 rounded-lg px-4 py-3 ${
+                          isActive ? 'active' : ''
+                      }`}
                   >
-                      <div className="flex items-center gap-2">
-                          {menuItem.icon}
-                          <span>{menuItem.label}</span>
+                      <div className="flex items-center gap-3">
+                          <div className="icon">
+                              {menuItem.icon}
+                          </div>
+                          <span className="font-medium">{menuItem.label}</span>
                       </div>
                       {notificationCount > 0 && (
                           <Badge
-                              variant="destructive"
-                              className="h-6 w-6 p-0 flex items-center justify-center rounded-full text-xs"
+                              className="admin-sidebar badge h-6 w-6 p-0 flex items-center justify-center rounded-full text-xs font-semibold"
                           >
                               {notificationCount}
                           </Badge>
@@ -104,19 +127,20 @@ function AdminSideBar({ open, setOpen })
 
   useEffect(() => {
       dispatch(getAllOrdersForAdmin());
+      dispatch(fetchMessages());
   }, [dispatch]);
 
   return (
       <Fragment>
           <Sheet open={open} onOpenChange={setOpen}>
-              <SheetContent side="left" className="w-64 p-0 pt-4 flex flex-col" aria-describedby={undefined}>
-                  <SheetHeader className="border-b px-6 pb-4">
+              <SheetContent side="left" className="admin-sidebar w-72 p-0 pt-4 flex flex-col bg-background/95 backdrop-blur-sm" aria-describedby={undefined}>
+                  <SheetHeader className="admin-sidebar header border-b px-6 pb-4">
                        <SheetTitle
                           onClick={() => { navigate("/admin/dashboard"); if(setOpen) setOpen(false); }}
-                          className="flex cursor-pointer items-center gap-2"
+                          className="admin-sidebar header-title flex cursor-pointer items-center gap-3 text-foreground transition-colors"
                        >
-                         <ChartNoAxesCombined size={26} />
-                         <span className="text-xl font-extrabold">Admin Panel</span>
+                         <ShieldUser size={28} className="icon" />
+                         <span className="text-xl font-bold">Admin Panel</span>
                        </SheetTitle>
                   </SheetHeader>
                   <div className="flex-grow p-6 overflow-y-auto">
@@ -125,14 +149,14 @@ function AdminSideBar({ open, setOpen })
               </SheetContent>
           </Sheet>
 
-          <aside className="hidden w-64 flex-col border-r bg-background lg:flex">
-              <div className="border-b p-6">
+          <aside className="admin-sidebar hidden w-72 flex-col border-r bg-background/95 backdrop-blur-sm lg:flex">
+              <div className="admin-sidebar header border-b p-6">
                   <div
                       onClick={() => navigate("/admin/dashboard")}
-                      className="flex cursor-pointer items-center gap-2"
+                      className="admin-sidebar header-title flex cursor-pointer items-center gap-3 text-foreground transition-colors"
                   >
-                      <ChartNoAxesCombined size={26} />
-                      <span className="text-xl font-extrabold">Admin Panel</span>
+                      <ShieldUser size={28} className="icon" />
+                      <span className="text-xl font-bold">Admin Panel</span>
                   </div>
               </div>
                <div className="flex-grow p-6 overflow-y-auto">

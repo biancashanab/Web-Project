@@ -110,6 +110,9 @@ function App()
           <Route path="account" element={<ShoppingAccount />} />
           <Route path="listing" element={<ShoppingListing />} />
           <Route path="checkout" element={<ShoppingCheckout />} />
+          <Route path="about" element={<ShoppingAbout />} />
+          <Route path="search" element={<SearchPets />} />
+          <Route path="contact" element={<ContactPage />} />
         </Route>
 
         {/* Not found route */}

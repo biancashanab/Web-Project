@@ -134,6 +134,11 @@ export const addAnimalFormElements = [
       label: "Search",
       path: "/shop/search",
     },
+    {
+      id: "contact",
+      label: "Contact",
+      path: "/shop/contact",
+    },
   ];
   
   export const animalOptionsMap = {

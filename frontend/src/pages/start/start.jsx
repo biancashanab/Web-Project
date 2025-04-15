@@ -15,10 +15,14 @@ function HomePage()
         
         <ul className="nav-links">
           <li><Link to="/">Home</Link></li>
-          <li><Link to="/about">About</Link></li>
-          <li><Link to="/testimonials">Testimonials</Link></li>
-          <li><Link to="/contact">Contact</Link></li>
-          <li><Link to="/shop/home" className="btn-orange see-pets-btn">See Pets</Link></li>
+          <li><Link to="/shop/about">About</Link></li>
+          <li><Link to="/shop/about#success-stories">Testimonials</Link></li>
+          <li><Link to="/shop/contact">Contact</Link></li>
+          <li>
+            <Link to="/shop/home" className="btn-orange see-pets-btn">
+              See Pets
+            </Link>
+          </li>
         </ul>
       </nav>
 

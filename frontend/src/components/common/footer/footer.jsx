@@ -1,5 +1,6 @@
 import React from "react";
 import { Facebook, Twitter, Instagram, Globe, Youtube } from "lucide-react";
+import { Link } from "react-router-dom";
 import "./footer.css";
 
 function CustomFooter() 
@@ -31,10 +32,10 @@ function CustomFooter()
 
       {/* Secțiunea cu link-urile */}
       <div className="footer-links">
-        <a href="#home">Home</a>
+        <Link to="/shop/home#">Home</Link>
+        <Link to="/shop/about#">About</Link>
+        <Link to="/shop/contact#">Contact Us</Link>
         <a href="#news">News</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact Us</a>
         <a href="#team">Our Team</a>
       </div>
 

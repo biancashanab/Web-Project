@@ -149,36 +149,36 @@ function ShoppingHome() {
           {numImages > 1 && (
             <>
               <Button
-                variant="outline"
-                size="icon"
+                variant="ghost"
+                size="sm"
                 onClick={() =>
                   setCurrentSlide((prev) => (prev - 1 + numImages) % numImages)
                 }
-                className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/70 hover:bg-white/90 text-foreground rounded-full shadow-md"
+                className="absolute top-1/2 left-4 transform -translate-y-1/2 text-white hover:text-white/80 rounded-full m-2 hover:bg-black/10 h-8 w-8 p-0"
                 aria-label="Previous image"
               >
-                <ChevronLeftIcon className="w-5 h-5" />
+                <ChevronLeftIcon className="w-4 h-4" />
               </Button>
               <Button
-                variant="outline"
-                size="icon"
+                variant="ghost"
+                size="sm"
                 onClick={() =>
                   setCurrentSlide((prev) => (prev + 1) % numImages)
                 }
-                className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/70 hover:bg-white/90 text-foreground rounded-full shadow-md"
+                className="absolute top-1/2 right-4 transform -translate-y-1/2 text-white hover:text-white/80 rounded-full m-2 hover:bg-black/10 h-8 w-8 p-0"
                 aria-label="Next image"
               >
-                <ChevronRightIcon className="w-5 h-5" />
+                <ChevronRightIcon className="w-4 h-4" />
               </Button>
             </>
           )}
         </div>
 
-        <section className="py-12 bg-muted/50">
+        <section className="py-12 mx-4 md:mx-8 lg:mx-10">
           <h2 className="text-3xl font-bold text-center mb-8">
             Browse by Species
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {speciesWithIcon.map((speciesItem) => (
               <Card
                 key={speciesItem.id}
@@ -187,9 +187,9 @@ function ShoppingHome() {
                 }
                 className="cursor-pointer hover:shadow-lg transition-shadow overflow-hidden rounded-lg border bg-card text-card-foreground"
               >
-                <CardContent className="flex flex-col items-center justify-center p-6 aspect-square">
-                  <speciesItem.icon className="w-10 h-10 sm:w-12 sm:h-12 mb-3 text-primary" />
-                  <span className="font-semibold text-center">
+                <CardContent className="flex flex-col items-center justify-center p-4 aspect-[4/3]">
+                  <speciesItem.icon className="w-8 h-8 sm:w-10 sm:h-10 mb-2 text-primary" />
+                  <span className="font-semibold text-center text-sm">
                     {speciesItem.label}
                   </span>
                 </CardContent>
@@ -202,19 +202,20 @@ function ShoppingHome() {
           <h2 className="text-3xl font-bold text-center mb-8">
             Recently Available Pets
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
             {petList && petList.length > 0 ? (
               petList
                 .slice()
                 .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .slice(0, 4)
                 .map((petItem) => (
-                  <ShoppingPetTile
-                    key={petItem._id}
-                    handleGetPetDetails={handleGetPetDetails}
-                    pet={petItem}
-                    handleAddtoCart={handleAddtoCart}
-                  />
+                  <div key={petItem._id} className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden rounded-xl border bg-card text-card-foreground">
+                    <ShoppingPetTile
+                      handleGetPetDetails={handleGetPetDetails}
+                      pet={petItem}
+                      handleAddtoCart={handleAddtoCart}
+                    />
+                  </div>
                 ))
             ) : (
               <p className="col-span-full text-center text-muted-foreground">

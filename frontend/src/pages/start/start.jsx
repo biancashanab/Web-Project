@@ -14,7 +14,7 @@ function HomePage() {
         <h1 className="logo">PET ADOPT</h1>
         
         <ul className="nav-links">
-          <li><Link to="/">Home</Link></li>
+          <li><Link to="/shop/home">Home</Link></li>
           <li><Link to="/shop/about">About</Link></li>
           <li><Link to="/shop/about#success-stories">Testimonials</Link></li>
           <li><Link to="/contact">Contact</Link></li>

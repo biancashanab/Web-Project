@@ -4,7 +4,6 @@ import axios from "axios";
 const initialState = {
   isAuthenticated: false,
   isLoading: false,
-  isTransitioning: false, // New state for transitions between pages after auth actions
   user: null,
 };
 
@@ -50,6 +49,22 @@ export const checkAuth = createAsyncThunk(
     try {
       const response = await axios.get(
         "http://localhost:8080/api/auth/check-auth",
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { success: false });
+    }
+  }
+);
+
+export const updateUser = createAsyncThunk(
+  "/auth/update-user",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(
+        "http://localhost:8080/api/auth/update-user",
+        formData,
         { withCredentials: true }
       );
       return response.data;
@@ -138,11 +153,26 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload.success ? action.payload.user : null;
         state.isAuthenticated = action.payload.success;
+        state.isTransitioning = action.payload.success; // Start transition if user is authenticated
       })
       .addCase(checkAuth.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
+        state.isTransitioning = false;
+      })
+      // Update User
+      .addCase(updateUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload.success) {
+          state.user = action.payload.user;
+        }
+      })
+      .addCase(updateUser.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });

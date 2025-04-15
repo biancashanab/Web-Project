@@ -1,41 +1,31 @@
-import { Navigate, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { startTransition } from "../../store/auth";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-function CheckAuth({ isAuthenticated, user, children }) 
-{
+function CheckAuth({ isAuthenticated, user, children }) {
   const location = useLocation();
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const navigateWithTransition = (path) => {
-    dispatch(startTransition());
-    return <Navigate to={path} />;
-  };
-
-  const currentUser = isAuthenticated ? user : { role: "guest" };
-
-  if (location.pathname === "/") {
-    return navigateWithTransition("/");
-  }
-
-  if (isAuthenticated && (location.pathname.includes("/auth"))) 
-  {
-    if (user?.role === "admin") {
-      return navigateWithTransition("/admin/dashboard");
-    } else {
-      return navigateWithTransition("/shop/home");
+  useEffect(() => {
+    if (location.pathname === "/") {
+      navigate("/");
     }
-  }
 
-  if (isAuthenticated && user?.role !== "admin" && location.pathname.includes("admin")) 
-  {
-    return navigateWithTransition("/unauth-page");
-  }
+    if (isAuthenticated && location.pathname.includes("/auth")) {
+      if (user?.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/shop/home");
+      }
+    }
 
-  if (isAuthenticated && user?.role === "admin" && location.pathname.includes("shop")) 
-  {
-    return navigateWithTransition("/admin/dashboard");
-  }
+    if (isAuthenticated && user?.role !== "admin" && location.pathname.includes("admin")) {
+      navigate("/unauth-page");
+    }
+
+    if (isAuthenticated && user?.role === "admin" && location.pathname.includes("shop")) {
+      navigate("/admin/dashboard");
+    }
+  }, [isAuthenticated, user, location, navigate]);
 
   return <>{children}</>;
 }

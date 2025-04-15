@@ -1,0 +1,51 @@
+.custom-footer {
+    background-color: #fadba1; 
+    color: black;           
+    padding: 20px 0;     
+    text-align: center;   
+    font-family: sans-serif;
+  }
+  
+  /* Iconițe sociale centrate cu Flexbox */
+  .social-icons {
+    display: flex;
+    justify-content: center; 
+    gap: 20px;         
+    margin-bottom: 15px;
+  }
+  
+  .social-icons a {
+    color: black;
+    transition: color 0.3s ease;
+  }
+  
+  .social-icons a:hover {
+    color: #ff9800;
+  }
+  
+  /* Link-urile din footer, tot centrate */
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;           
+    margin-bottom: 15px;
+  }
+  
+  .footer-links a {
+    color: black;
+    opacity: 0.7;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .footer-links a:hover {
+    color: #ff9800;
+  }
+  
+  /* Copyright */
+  .footer-copy p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.7; 
+  }
+  

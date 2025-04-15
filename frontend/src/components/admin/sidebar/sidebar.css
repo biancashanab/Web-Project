@@ -1,0 +1,57 @@
+.admin-sidebar {
+  --primary-color: #fc993b;
+  --primary-hover: #ff9500;
+  --primary-light: #fff3e0;
+  --accent-color: #ffd700;
+  --accent-hover: #ffed4a;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --background-light: #fff9e6;
+}
+
+.admin-sidebar .menu-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.admin-sidebar .menu-item:hover {
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+}
+
+.admin-sidebar .menu-item.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.admin-sidebar .menu-item.active:hover {
+  background-color: var(--primary-hover);
+}
+
+.admin-sidebar .icon {
+  color: var(--primary-color);
+}
+
+.admin-sidebar .menu-item.active .icon {
+  color: white;
+}
+
+.admin-sidebar .badge {
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+}
+
+.admin-sidebar .badge:hover {
+  background-color: var(--accent-hover);
+}
+
+.admin-sidebar .header {
+  border-bottom: 2px solid var(--primary-light);
+}
+
+.admin-sidebar .header-title {
+  color: var(--primary-color);
+}
+
+.admin-sidebar .header-title:hover {
+  color: var(--primary-hover);
+} 

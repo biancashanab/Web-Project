@@ -6,6 +6,12 @@ export const getFilteredPets = async (req, res) => {
 
     const query = {};
 
+    // Show pets that are either available or don't have a status set
+    query.$or = [
+      { status: 'available' },
+      { status: { $exists: false } }
+    ];
+
     if (breed) {
       const breedArray = breed.split(",");
       if (breedArray.length) {

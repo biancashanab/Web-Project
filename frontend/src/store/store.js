@@ -4,7 +4,7 @@ import AdminPetsSlice from "./admin/pets";
 import AdminOrderSlice from "./admin/adoption_order";
 import adminStatsReducer from "./admin/stats";
 import adminUsersReducer from "./admin/users";
-import adminContactMessagesReducer from "./admin/contact-messages-slice";
+import adminContactMessagesReducer from "./admin/contact-messages";
 
 import shopPetsSlice from "./shop/pets";
 import shopCartSlice from "./shop/cart";

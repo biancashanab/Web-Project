@@ -1,10 +1,13 @@
-import User from '../../models/User.js'; // Adjust path
+import User from '../../models/User.js';
+import AdoptionOrder from '../../models/AdoptionOrder.js';
+import Cart from '../../models/Cart.js';
+import Address from '../../models/Address.js';
 
 export const getAllUsersForAdmin = async (req, res) => {
     try {
         const users = await User.find({})
-                                .select('-password') // Exclude password field
-                                .sort({ userName: 1 }); // Sort alphabetically by username
+                                .select('-password') 
+                                .sort({ userName: 1 });
 
         res.status(200).json({
             success: true,
@@ -25,7 +28,6 @@ export const deleteUser = async (req, res) => {
     try {
         const { userId } = req.params;
 
-        // Check if user exists
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({
@@ -34,8 +36,7 @@ export const deleteUser = async (req, res) => {
             });
         }
 
-        // Prevent deleting the last admin
-        if (user.role === 'admin') {
+        if (user.role === 'admin') {                            // nu sterg ultimul admin existent
             const adminCount = await User.countDocuments({ role: 'admin' });
             if (adminCount <= 1) {
                 return res.status(400).json({
@@ -45,12 +46,17 @@ export const deleteUser = async (req, res) => {
             }
         }
 
-        // Delete the user
-        await User.findByIdAndDelete(userId);
+        await Promise.all([                          // sterg toate datele asociate
+            AdoptionOrder.deleteMany({ userId }),
+            Cart.deleteOne({ userId }),
+            Address.deleteMany({ userId }),
+            User.findByIdAndDelete(userId)
+        ]);
 
         res.status(200).json({
             success: true,
-            message: "User deleted successfully."
+            message: "User and all associated data deleted successfully.",
+            userId: userId
         });
 
     } catch (error) {

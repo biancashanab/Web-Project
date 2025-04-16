@@ -68,7 +68,7 @@ function UserManagement()
                         <p className="text-red-500 text-center">Error: {error}</p>
                     )}
                     {!isLoading && !error && (
-                        <div className="space-y-4">
+                        <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                             {filteredUsers.map((user) => (
                                 <div
                                     key={user._id}

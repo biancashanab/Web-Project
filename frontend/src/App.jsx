@@ -11,7 +11,6 @@ import AdminLayout from "./components/admin/layout";
 import AdminDashboard from "./pages/admin/dashboard/dashboard";
 import AdminPets from "./pages/admin/pets";
 import AdminAdoptionOrders from "./components/admin/adoption_orders";
-import AdminFeatures from "./pages/admin/features";
 import ShoppingLayout from "./components/shopping/layout";
 import NotFound from "./pages/not-found";
 import ShoppingHome from "./pages/shopping-view/home";
@@ -27,7 +26,7 @@ import SearchPets from "./pages/shopping-view/search";
 import UserManagement from "./pages/admin/users";
 import AboutManagement from "./pages/admin/about-management";
 import ContactPage from "./pages/contact/contact";
-import ContactMessages from "./components/admin/contact-messages";
+import ContactMessages from "./pages/admin/contact-messages";
 
 function App() 
 {
@@ -56,8 +55,6 @@ function App()
     });
     return <LoadingCat />;
   }
-
-  console.log("App rendering:", { isLoading, isAuthenticated, user });
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -90,7 +87,6 @@ function App()
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="pets" element={<AdminPets />} />
           <Route path="adoption_orders" element={<AdminAdoptionOrders />} />
-          <Route path="features" element={<AdminFeatures />} />
           <Route path="about" element={<AboutManagement />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="messages" element={<ContactMessages />} />

@@ -24,6 +24,14 @@ export const searchPets = async (req, res) => {
         { breed: searchPattern },
         { colour: searchPattern },
         { size: searchPattern }
+      ],
+      $and: [
+        {
+          $or: [
+            { status: 'available' },
+            { status: { $exists: false } }
+          ]
+        }
       ]
     };
 
@@ -31,9 +39,7 @@ export const searchPets = async (req, res) => {
     const searchResults = await Pet.find(searchQuery)
       .sort({ createdAt: -1 }); // Sort by newest first
 
-    // Log the search results for debugging
-    console.log(`Search results for "${keyword}":`, searchResults.length);
-
+      
     res.status(200).json({ 
       success: true, 
       data: searchResults,

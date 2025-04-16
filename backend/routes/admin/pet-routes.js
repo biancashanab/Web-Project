@@ -6,6 +6,8 @@ import {
     editPet,
     fetchAllPets,
     deletePet,
+    getPetHistory,
+    updatePetsStatus
   } from "../../controllers/admin/pets-controller.js";
     
   const router = express.Router();
@@ -15,5 +17,7 @@ import {
   router.put("/edit/:id", editPet);
   router.delete("/delete/:id", deletePet);
   router.get("/get", fetchAllPets);
+  router.get("/history/:id", getPetHistory);
+  router.post("/update-status", updatePetsStatus);
   
   export default router;

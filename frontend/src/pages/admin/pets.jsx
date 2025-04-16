@@ -20,6 +20,11 @@ import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { DialogTitle} from "@radix-ui/react-dialog";
+import PetHistory from "../../components/admin/pets-history";
+import {
+  Dialog,
+  DialogContent,
+} from "../../components/ui/dialog";
 
 const initialFormData = {
   image: null,
@@ -38,6 +43,8 @@ function AdminPets()
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [imageLoadingState, setImageLoadingState] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
+  const [selectedPetId, setSelectedPetId] = useState(null);
+  const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
 
   const { petList } = useSelector((state) => state.adminPets);
   const dispatch = useDispatch();
@@ -75,7 +82,6 @@ function AdminPets()
             setImageFile(null);
             setFormData(initialFormData);
             toast.success(data?.payload?.message);
-           
           }
         });
   }
@@ -97,29 +103,68 @@ function AdminPets()
 
   useEffect(() => { dispatch(fetchAllPets()); }, [dispatch]);
 
-  console.log(formData, "petList");
+  const handleViewHistory = (petId) => {
+    setSelectedPetId(petId);
+    setOpenHistoryDialog(true);
+  };
 
   return (
     <Fragment>
-      <div className="mb-5 w-full flex justify-end">
-        <Button onClick={() => setOpenCreatePetsDialog(true)}>
-          Add Pet Advertisement
-        </Button>
+      <div className="flex flex-col gap-8">
+        {/* Available Pets Section */}
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-semibold">Available Pets</h2>
+            <Button onClick={() => setOpenCreatePetsDialog(true)}>
+              Add Pet Advertisement
+            </Button>
+          </div>
+          <div className="h-[550px] overflow-y-auto pr-4">
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {petList && petList.filter(pet => pet.status !== 'adopted').length > 0
+                ? petList
+                    .filter(pet => pet.status !== 'adopted')
+                    .map((petItem) => (
+                      <AdminPetTile
+                        key={petItem._id} 
+                        setFormData={setFormData}
+                        setOpenCreatePetsDialog={setOpenCreatePetsDialog}
+                        setCurrentEditedId={setCurrentEditedId}
+                        pet={petItem}
+                        handleDelete={handleDelete}
+                        onViewHistory={() => handleViewHistory(petItem._id)}
+                      />
+                    ))
+                : <p className="text-gray-500">No pets available</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Adopted Pets Section */}
+        <div className="flex flex-col gap-4">
+          <h2 className="text-2xl font-semibold">Adopted Pets</h2>
+          <div className="h-[550px] overflow-y-auto pr-4">
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {petList && petList.filter(pet => pet.status === 'adopted').length > 0
+                ? petList
+                    .filter(pet => pet.status === 'adopted')
+                    .map((petItem) => (
+                      <AdminPetTile
+                        key={petItem._id} 
+                        setFormData={setFormData}
+                        setOpenCreatePetsDialog={setOpenCreatePetsDialog}
+                        setCurrentEditedId={setCurrentEditedId}
+                        pet={petItem}
+                        handleDelete={handleDelete}
+                        onViewHistory={() => handleViewHistory(petItem._id)}
+                      />
+                    ))
+                : <p className="text-gray-500">No adopted pets</p>}
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {petList && petList.length > 0
-          ? petList.map((petItem) => (
-              <AdminPetTile
-                key={petItem._id} 
-                setFormData={setFormData}
-                setOpenCreatePetsDialog={setOpenCreatePetsDialog}
-                setCurrentEditedId={setCurrentEditedId}
-                pet={petItem}
-                handleDelete={handleDelete}
-              />
-            ))
-          : null}
-      </div>
+
       <Sheet
         open={openCreatePetsDialog}
         onOpenChange={() => {
@@ -128,7 +173,7 @@ function AdminPets()
           setFormData(initialFormData);
         }}
       >
-        <SheetContent side="right" className="overflow-auto">
+        <SheetContent side="right" className="overflow-auto scrollbar-hide">
             <VisuallyHidden>
                 <DialogTitle>Menu</DialogTitle>
               </VisuallyHidden>
@@ -159,6 +204,13 @@ function AdminPets()
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Pet History Dialog */}
+      <Dialog open={openHistoryDialog} onOpenChange={setOpenHistoryDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          {selectedPetId && <PetHistory petId={selectedPetId} />}
+        </DialogContent>
+      </Dialog>
     </Fragment>
   );
 }

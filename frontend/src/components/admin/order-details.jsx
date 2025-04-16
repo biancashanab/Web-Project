@@ -166,6 +166,7 @@ function AdminAdoptionApplicationDetailsView({ orderDetails: initialOrderDetails
                         <Select
                             value={selectedStatus}
                             onValueChange={setSelectedStatus}
+                            disabled={orderDetails.adoptionStatus === 'rejected'}
                         >
                             <SelectTrigger id="adoptionStatusSelect" className="flex-grow">
                                 <SelectValue placeholder="Select status..." />
@@ -185,7 +186,7 @@ function AdminAdoptionApplicationDetailsView({ orderDetails: initialOrderDetails
             <DialogFooter className="pt-4 border-t mt-auto">
                 <Button
                     onClick={handleStatusUpdate}
-                    disabled={!selectedStatus || selectedStatus === orderDetails.adoptionStatus || isUpdating}
+                    disabled={!selectedStatus || selectedStatus === orderDetails.adoptionStatus || isUpdating || orderDetails.adoptionStatus === 'rejected'}
                 >
                     {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {isUpdating ? "Updating..." : "Update Status"}

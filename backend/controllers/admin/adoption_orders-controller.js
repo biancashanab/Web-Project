@@ -1,11 +1,11 @@
-import AdoptionOrder from "../../models/AdoptionOrder.js"; // Ensure correct path
-import Pet from "../../models/Pet.js"; // Import Pet model
+import AdoptionOrder from "../../models/AdoptionOrder.js"; 
+import Pet from "../../models/Pet.js"; 
 
 export const getAllOrdersOfAllUsers = async (req, res) => {
     try {
         const orders = await AdoptionOrder.find({})
-                                          .populate('userId', 'userName email') // Populate user name/email
-                                          .sort({ adoptionDate: -1 }); // Sort by newest first
+                                          .populate('userId', 'userName email') 
+                                          .sort({ adoptionDate: -1 }); 
 
         res.status(200).json({
             success: true,
@@ -29,8 +29,8 @@ export const getOrderDetailsForAdmin = async (req, res) => {
         }
 
         const order = await AdoptionOrder.findById(id)
-                                         .populate('userId', 'userName email phone') // Populate more user details
-                                         .populate('pets.PetId', 'name species breed image'); // Populate details of pets applied for
+                                         .populate('userId', 'userName email phone') 
+                                         .populate('pets.PetId', 'name species breed image');
 
         if (!order) {
             return res.status(404).json({
@@ -55,7 +55,7 @@ export const getOrderDetailsForAdmin = async (req, res) => {
 export const updateOrderStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { adoptionStatus } = req.body;
+        let { adoptionStatus } = req.body;
 
          if (!id || id === 'undefined') {
             return res.status(400).json({ success: false, message: "Valid Application ID required." });
@@ -68,6 +68,23 @@ export const updateOrderStatus = async (req, res) => {
              return res.status(400).json({ success: false, message: "Invalid adoption status value provided." });
          }
 
+        // First get the order to check pets
+        const order = await AdoptionOrder.findById(id).populate('pets.PetId');
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Application not found!",
+            });
+        }
+
+        // Check if any pets are already adopted
+        const hasAdoptedPets = order.pets.some(pet => pet.PetId && pet.PetId.status === 'adopted');
+        if (hasAdoptedPets) {
+            // If trying to approve or complete an order with adopted pets, reject it
+            if (adoptionStatus === 'approved' || adoptionStatus === 'completed') {
+                adoptionStatus = 'rejected';
+            }
+        }
 
         const updatedOrder = await AdoptionOrder.findByIdAndUpdate(
             id,
@@ -76,29 +93,59 @@ export const updateOrderStatus = async (req, res) => {
                 lastUpdated: new Date()
             },
             { new: true }
-        );
-
-        if (!updatedOrder) {
-            return res.status(404).json({
-                success: false,
-                message: "Application not found!",
-            });
-        }
+        ).populate('pets.PetId');
 
         if (adoptionStatus === 'completed') {
+            // Update all pets in the order to 'adopted' status
             for (const petInfo of updatedOrder.pets) {
-                await Pet.findByIdAndUpdate(petInfo.PetId, { status: 'adopted' });
+                if (petInfo.PetId) {
+                    await Pet.findByIdAndUpdate(petInfo.PetId._id, { 
+                        status: 'adopted',
+                        adoptionDate: new Date(),
+                        adoptedBy: updatedOrder.userId
+                    });
+                }
+            }
+        } else if (adoptionStatus === 'rejected' || adoptionStatus === 'cancelled') {
+            // If the order is rejected or cancelled, ensure pets are available for adoption
+            for (const petInfo of updatedOrder.pets) {
+                if (petInfo.PetId) {
+                    await Pet.findByIdAndUpdate(petInfo.PetId._id, { 
+                        status: 'available',
+                        adoptionDate: null,
+                        adoptedBy: null
+                    });
+                }
             }
         }
 
-
         res.status(200).json({
             success: true,
-            message: "Adoption status updated successfully!",
+            message: hasAdoptedPets ? "Application automatically rejected due to already adopted pets." : "Adoption status updated successfully!",
             data: updatedOrder
         });
     } catch (e) {
         console.error("Error updating adoption status:", e);
+        res.status(500).json({
+            success: false,
+            message: "Server error occurred!",
+        });
+    }
+};
+
+export const getAdoptedPetsHistory = async (req, res) => {
+    try {
+        const adoptedPets = await Pet.find({ status: 'adopted' })
+            .populate('adoptedBy', 'userName email')
+            .sort({ adoptionDate: -1 });
+
+        res.status(200).json({
+            success: true,
+            data: adoptedPets,
+            message: adoptedPets.length ? "Adopted pets history found." : "No adopted pets history found."
+        });
+    } catch (e) {
+        console.error("Error fetching adopted pets history:", e);
         res.status(500).json({
             success: false,
             message: "Server error occurred!",

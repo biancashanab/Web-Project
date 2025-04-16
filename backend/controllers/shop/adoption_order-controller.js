@@ -1,5 +1,6 @@
 import AdoptionOrder from "../../models/AdoptionOrder.js";
 import User from "../../models/User.js"; 
+import Pet from "../../models/Pet.js";
 
 export const submitAdoptionApplication = async (req, res) => {
     try {
@@ -19,6 +20,18 @@ export const submitAdoptionApplication = async (req, res) => {
         const user = await User.findById(userId).select('userName email');
         if (!user) {
              return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        // Check if any pets are already adopted
+        const petIds = pets.map(pet => pet.PetId);
+        const petsStatus = await Pet.find({ _id: { $in: petIds } }).select('status');
+        const hasAdoptedPets = petsStatus.some(pet => pet.status === 'adopted');
+
+        if (hasAdoptedPets) {
+            return res.status(400).json({
+                success: false,
+                message: "One or more pets in this application are already adopted.",
+            });
         }
 
         const newApplication = new AdoptionOrder({

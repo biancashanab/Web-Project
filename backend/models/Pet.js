@@ -11,6 +11,20 @@ const PetSchema = new mongoose.Schema(
     colour: String,
     size: String,
     description: String,
+    status: { 
+      type: String, 
+      enum: ['available', 'adopted'],
+      default: 'available'
+    },
+    adoptionDate: {
+      type: Date,
+      default: null
+    },
+    adoptedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    }
   },
   { timestamps: true }
 );

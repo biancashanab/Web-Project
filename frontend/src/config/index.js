@@ -62,6 +62,16 @@ export const addPetFormElements = [
       placeholder: "Enter animal age",
     },
     {
+      label: "Gender",
+      name: "gender",
+      componentType: "select",
+      options: [
+        { id: "male", label: "Male" },
+        { id: "female", label: "Female" },
+        { id: "unknown", label: "Unknown" },
+      ],
+    },
+    {
       label: "Species",
       name: "species",
       componentType: "select",
@@ -181,6 +191,11 @@ export const addPetFormElements = [
         { id: "puppy", label: "Puppy/Kitten" },
         { id: "adult", label: "Adult" },
         { id: "senior", label: "Senior" },
+      ],
+      gender: [
+        { id: "male", label: "Male" },
+        { id: "female", label: "Female" },
+        { id: "unknown", label: "Unknown" },
       ],
       colours: [
         { id: "black", label: "Black" },

@@ -6,6 +6,11 @@ const PetSchema = new mongoose.Schema(
     title: String,
     name: String,
     age: Number,
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'unknown'],
+      default: 'unknown'
+    },
     species: String,
     breed: String,
     colour: String,

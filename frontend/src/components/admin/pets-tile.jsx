@@ -32,6 +32,10 @@ function AdminPetTile({
             <p className="text-gray-600">{pet?.breed}</p>
             <p className="text-gray-600">Age: {pet?.age} years</p>
           </div>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-gray-600">Gender: {pet?.gender || 'Unknown'}</p>
+            <p className="text-gray-600">{pet?.species}</p>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <div className="flex gap-2">

@@ -96,6 +96,9 @@ function PetDetailsDialog({ open, setOpen, PetDetails })
              {PetDetails?.color && (
                 <p><strong className="font-semibold text-foreground">Color:</strong> {PetDetails.color}</p>
              )}
+             {PetDetails?.gender && (
+                <p><strong className="font-semibold text-foreground">Gender:</strong> {PetDetails.gender}</p>
+             )}
           </div>
           {PetDetails?.description && (
              <p className="text-muted-foreground text-lg mb-5 mt-2">

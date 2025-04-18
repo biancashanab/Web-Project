@@ -6,6 +6,7 @@ import {
   Users,
   FileText,
   MessageSquare,
+  BarChart,
 } from "lucide-react";
 import { Fragment, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -48,6 +49,12 @@ const adminSidebarMenuItems = [
       path: "/admin/messages",
       icon: <MessageSquare />,
       notificationId: 'pendingMessages'
+  },
+  {
+      id: "stats",
+      label: "Statistics",
+      path: "/admin/stats",
+      icon: <BarChart />,
   },
   {
       id: "about",

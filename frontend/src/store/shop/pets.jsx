@@ -10,18 +10,28 @@ const initialState = {
 export const fetchAllFilteredPets = createAsyncThunk(
   "/pets/fetchAllPets",
   async ({ filterParams, sortParams }) => {
-    console.log(fetchAllFilteredPets, "fetchAllFilteredPets");
+    console.log("Filter params:", filterParams);
+    console.log("Sort params:", sortParams);
 
-    const query = new URLSearchParams({
-      ...filterParams,
-      sortBy: sortParams,
+    const query = new URLSearchParams();
+    
+    // Handle array parameters correctly
+    Object.entries(filterParams).forEach(([key, value]) => {
+      if (Array.isArray(value) && value.length > 0) {
+        query.append(key, value.join(','));
+      }
     });
+    
+    // Add sort parameter
+    query.append('sortBy', sortParams);
+
+    console.log("Query string:", query.toString());
 
     const result = await axios.get(
       `http://localhost:8080/api/shop/pets/get?${query}`
     );
 
-    console.log(result);
+    console.log("API response:", result?.data);
 
     return result?.data;
   }

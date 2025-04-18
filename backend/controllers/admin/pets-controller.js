@@ -24,7 +24,7 @@ export const handleImageUpload = async (req, res) => {
 export const addPet = async (req, res) => {
   try 
   {
-    const { image, title, name, age, description, species, breed, colour, size } = req.body;
+    const { image, title, name, age, description, species, breed, colour, size, gender } = req.body;
 
     const newlyCreatedPet = new Pet({
       image,
@@ -36,6 +36,7 @@ export const addPet = async (req, res) => {
       size,
       colour,
       description,
+      gender,
       status: 'available'
     });
 
@@ -75,7 +76,7 @@ export const fetchAllPets = async (req, res) => {
 export const editPet = async (req, res) => {
   try {
     const { id } = req.params;    //id-ul pet-ului pe care vreau sa il editez
-    const { image, title, name, age, description, species, breed, colour, size } = req.body;
+    const { image, title, name, age, description, species, breed, colour, size, gender } = req.body;
 
     let findPet = await Pet.findById(id);
     if (!findPet)
@@ -94,6 +95,7 @@ export const editPet = async (req, res) => {
     findPet.colour = colour || findPet.colour;
     findPet.size = size || findPet.size;
     findPet.age = age || findPet.age;
+    findPet.gender = gender || findPet.gender;
 
     await findPet.save();   //salvez modificarile in baza de date
     

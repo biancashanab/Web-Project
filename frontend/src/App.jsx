@@ -27,6 +27,7 @@ import UserManagement from "./pages/admin/users";
 import AboutManagement from "./pages/admin/about-management";
 import ContactPage from "./pages/contact/contact";
 import ContactMessages from "./pages/admin/contact-messages";
+import AdminStats from "./pages/admin/stats";
 
 function App() 
 {
@@ -90,6 +91,7 @@ function App()
           <Route path="about" element={<AboutManagement />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="messages" element={<ContactMessages />} />
+          <Route path="stats" element={<AdminStats />} />
         </Route>
 
         {/* Shopping routes */}

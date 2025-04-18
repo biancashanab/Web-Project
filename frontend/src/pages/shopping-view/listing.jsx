@@ -62,7 +62,10 @@ function ShoppingListing()
   function handleFilter(getSectionId, getCurrentOption) {
     let cpyFilters = { ...filters };
     const indexOfCurrentSection = Object.keys(cpyFilters).indexOf(getSectionId);
-    console.log(indexOfCurrentSection, "indexOfCurrentSection");
+    console.log("Filter section:", getSectionId);
+    console.log("Filter option:", getCurrentOption);
+    console.log("Current filters:", cpyFilters);
+    
     if (indexOfCurrentSection === -1) {
       cpyFilters = {
         ...cpyFilters,
@@ -77,9 +80,9 @@ function ShoppingListing()
       else cpyFilters[getSectionId].splice(indexOfCurrentOption, 1);
     }
 
+    console.log("Updated filters:", cpyFilters);
     setFilters(cpyFilters);
     sessionStorage.setItem("filters", JSON.stringify(cpyFilters));
-    console.log(cpyFilters, "cpyFilters");
   }
 
   function handleGetPetDetails(getCurrentPetId) 

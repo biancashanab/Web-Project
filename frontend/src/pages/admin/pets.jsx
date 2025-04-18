@@ -25,6 +25,7 @@ import {
   Dialog,
   DialogContent,
 } from "../../components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
 
 const initialFormData = {
   image: null,
@@ -33,6 +34,7 @@ const initialFormData = {
   description: "",
   species: "", 
   breed: "",
+  gender: "unknown",
 };
 
 function AdminPets() 
@@ -45,6 +47,7 @@ function AdminPets()
   const [currentEditedId, setCurrentEditedId] = useState(null);
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
 
   const { petList } = useSelector((state) => state.adminPets);
   const dispatch = useDispatch();
@@ -108,61 +111,59 @@ function AdminPets()
     setOpenHistoryDialog(true);
   };
 
+  const renderPetGrid = (pets) => (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {pets && pets.length > 0
+        ? pets.map((petItem) => (
+            <AdminPetTile
+              key={petItem._id} 
+              setFormData={setFormData}
+              setOpenCreatePetsDialog={setOpenCreatePetsDialog}
+              setCurrentEditedId={setCurrentEditedId}
+              pet={petItem}
+              handleDelete={handleDelete}
+              onViewHistory={() => handleViewHistory(petItem._id)}
+            />
+          ))
+        : <p className="text-gray-500">No pets available</p>}
+    </div>
+  );
+
   return (
     <Fragment>
       <div className="flex flex-col gap-8">
-        {/* Available Pets Section */}
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-semibold">Available Pets</h2>
-            <Button onClick={() => setOpenCreatePetsDialog(true)}>
-              Add Pet Advertisement
-            </Button>
-          </div>
-          <div className="h-[550px] overflow-y-auto pr-4">
-            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {petList && petList.filter(pet => pet.status !== 'adopted').length > 0
-                ? petList
-                    .filter(pet => pet.status !== 'adopted')
-                    .map((petItem) => (
-                      <AdminPetTile
-                        key={petItem._id} 
-                        setFormData={setFormData}
-                        setOpenCreatePetsDialog={setOpenCreatePetsDialog}
-                        setCurrentEditedId={setCurrentEditedId}
-                        pet={petItem}
-                        handleDelete={handleDelete}
-                        onViewHistory={() => handleViewHistory(petItem._id)}
-                      />
-                    ))
-                : <p className="text-gray-500">No pets available</p>}
-            </div>
-          </div>
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-semibold">Pet Management</h2>
+          <Button onClick={() => setOpenCreatePetsDialog(true)}>
+            Add Pet Advertisement
+          </Button>
         </div>
 
-        {/* Adopted Pets Section */}
-        <div className="flex flex-col gap-4">
-          <h2 className="text-2xl font-semibold">Adopted Pets</h2>
-          <div className="h-[550px] overflow-y-auto pr-4">
-            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {petList && petList.filter(pet => pet.status === 'adopted').length > 0
-                ? petList
-                    .filter(pet => pet.status === 'adopted')
-                    .map((petItem) => (
-                      <AdminPetTile
-                        key={petItem._id} 
-                        setFormData={setFormData}
-                        setOpenCreatePetsDialog={setOpenCreatePetsDialog}
-                        setCurrentEditedId={setCurrentEditedId}
-                        pet={petItem}
-                        handleDelete={handleDelete}
-                        onViewHistory={() => handleViewHistory(petItem._id)}
-                      />
-                    ))
-                : <p className="text-gray-500">No adopted pets</p>}
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="flex w-fit h-6 gap-1">
+            <TabsTrigger value="all" className="text-xs px-7 h-7">All Pets</TabsTrigger>
+            <TabsTrigger value="available" className="text-xs px-7 h-7">Available Pets</TabsTrigger>
+            <TabsTrigger value="adopted" className="text-xs px-7 h-7">Adopted Pets</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="mt-2">
+            <div className="h-[600px] overflow-y-auto pr-6">
+              {renderPetGrid(petList)}
             </div>
-          </div>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="available" className="mt-2">
+            <div className="h-[600px] overflow-y-auto pr-6">
+              {renderPetGrid(petList?.filter(pet => pet.status !== 'adopted'))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="adopted" className="mt-2">
+            <div className="h-[600px] overflow-y-auto pr-6">
+              {renderPetGrid(petList?.filter(pet => pet.status === 'adopted'))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <Sheet
@@ -173,7 +174,7 @@ function AdminPets()
           setFormData(initialFormData);
         }}
       >
-        <SheetContent side="right" className="overflow-auto scrollbar-hide">
+        <SheetContent side="right" className="overflow-auto">
             <VisuallyHidden>
                 <DialogTitle>Menu</DialogTitle>
               </VisuallyHidden>

@@ -2,11 +2,10 @@ import Pet from "../../models/Pet.js";
 
 export const getFilteredPets = async (req, res) => {
   try {
-    const { breed = "", species = "", size = "", colours = "", age = "", sortBy = "age-lowtohigh" } = req.query;
+    const { breed = "", species = "", size = "", colours = "", age = "", gender = "", sortBy = "age-lowtohigh" } = req.query;
 
     const query = {};
 
-    // Show pets that are either available or don't have a status set
     query.$or = [
       { status: 'available' },
       { status: { $exists: false } }
@@ -33,7 +32,34 @@ export const getFilteredPets = async (req, res) => {
       }
     }
 
-    if (colours) {
+    if (gender) 
+      {
+      const genderArray = gender.split(",");
+
+      if (genderArray.length) 
+        {
+        if (genderArray.includes("unknown")) 
+          {
+          query.$or = [
+            { gender: { $in: genderArray } },
+            { gender: null },
+            { gender: undefined },
+            { gender: "" }
+          ];
+        } else {
+          query.gender = { $in: genderArray };
+        }
+        
+        const allPets = await Pet.find({});
+        console.log("All pets with gender values:");
+        allPets.forEach(pet => {
+          console.log(`Pet ID: ${pet._id}, Name: ${pet.name}, Gender: ${pet.gender}`);
+        });
+      }
+    }
+
+    if (colours) 
+      {
       const coloursArray = colours.split(",");
       if (coloursArray.length) {
         query.colour = { $in: coloursArray };
@@ -41,11 +67,15 @@ export const getFilteredPets = async (req, res) => {
       }
     }
 
-    if (age) {
+    if (age) 
+    {
       const ageArray = age.split(",");
       const ageArrayInt = [];
-      if (ageArray.length) {
-        for (let i = 0; i < ageArray.length; i++) {
+
+      if (ageArray.length) 
+      {
+        for (let i = 0; i < ageArray.length; i++) 
+        {
           if (ageArray[i] === "puppy") {
             ageArrayInt.push(0, 1, 2, 3);
           } else if (ageArray[i] === "adult") {
@@ -78,7 +108,7 @@ export const getFilteredPets = async (req, res) => {
         break;
     }
 
-    // Găsește animalele care respectă toate condițiile
+    // Găseste animalele care respecta toate conditiile
     const pets = await Pet.find(query).sort(sort);
 
     res.status(200).json({ success: true, data: pets });

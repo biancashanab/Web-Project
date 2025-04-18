@@ -7,7 +7,7 @@ import { fetchAllUsersForAdmin } from "../../../store/admin/users";
 import { addFeatureImage, getFeatureImages, deleteFeatureImage } from "../../../store/common";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { BarChart, Users, Cat, ClipboardCheck, Loader2, Trash2, Mail } from "lucide-react";
+import { BarChart, Users, Cat, ClipboardCheck, Loader2, Trash2, Mail, PieChart, Activity } from "lucide-react";
 import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -94,55 +94,125 @@ function AdminDashboard()
         return value ?? 'N/A';
     };
 
+    const renderStatCard = (title, value, icon, description = "") => (
+        <Card className="stats-card">
+            <CardHeader className="stats-card-header">
+                <CardTitle className="stats-card-title">{title}</CardTitle>
+                {icon}
+            </CardHeader>
+            <CardContent>
+                <div className="stats-card-value">{value}</div>
+                {description && <p className="stats-card-description">{description}</p>}
+            </CardContent>
+        </Card>
+    );
+
+    const renderDetailedStats = (title, data, type = "list") => {
+        if (!data || !Array.isArray(data)) return null;
+
+        return (
+            <Card className="detailed-stats-card">
+                <CardHeader>
+                    <CardTitle>{title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="detailed-stats-content">
+                        {data.map((item, index) => (
+                            <div key={index} className="detailed-stats-item">
+                                <span className="detailed-stats-label">{item._id || 'Unknown'}</span>
+                                <span className="detailed-stats-value">{item.count}</span>
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    };
+
     return (
         <div className="dashboard-container"> 
             {/* Section 1: Quick Stats */}
             <section className="stats-section">
-                <h2 className="section-header">Quick Stats</h2>
+                <div className="section-header-with-action">
+                    <h2 className="section-header">Quick Stats</h2>
+                    <Button variant="outline" size="sm" onClick={() => navigate('/admin/stats')}>
+                        View All Stats
+                    </Button>
+                </div>
                 <div className="stats-grid">
-                    {/* Stat Card: Total Pets */}
-                    <Card className="stats-card">
-                        <CardHeader className="stats-card-header">
-                            <CardTitle className="stats-card-title">Total Pets Available</CardTitle>
-                            <Cat className="stats-card-icon" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="stats-card-value">{stats?.totalPets || 0}</div>
-                        </CardContent>
-                    </Card>
+                    {renderStatCard("Total Pets Available", stats?.totalPets || 0, <Cat className="stats-card-icon" />)}
+                    {renderStatCard("Pending Applications", stats?.pendingApplications || 0, <ClipboardCheck className="stats-card-icon" />)}
+                    {renderStatCard("Total Users", stats?.totalUsers || 0, <Users className="stats-card-icon" />)}
+                    {renderStatCard("Total Contact Messages", stats?.totalContactMessages || 0, <Mail className="stats-card-icon" />)}
+                </div>
+            </section>
 
-                    {/* Stat Card: Pending Applications */}
-                    <Card className="stats-card">
-                        <CardHeader className="stats-card-header">
-                            <CardTitle className="stats-card-title">Pending Applications</CardTitle>
-                            <ClipboardCheck className="stats-card-icon" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="stats-card-value">{stats?.pendingApplications || 0}</div>
-                        </CardContent>
-                    </Card>
+            <hr className="section-separator" />
 
-                    {/* Stat Card: Total Users */}
-                    <Card className="stats-card">
-                        <CardHeader className="stats-card-header">
-                            <CardTitle className="stats-card-title">Total Users</CardTitle>
-                            <Users className="stats-card-icon" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="stats-card-value">{stats?.totalUsers || 0}</div>
-                        </CardContent>
-                    </Card>
+            {/* Section 2: Manage Feature Images */}
+            <section>
+                <h2 className="section-header">Manage Homepage Banner Images</h2>
+                <div className="feature-images-grid">
+                    <div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Upload New Image</CardTitle>
+                                <CardDescription>Select or paste an image URL to add to the banner.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <ProductImageUpload
+                                    imageFile={imageFile}
+                                    setImageFile={setImageFile}
+                                    uploadedImageUrl={uploadedImageUrl}
+                                    setUploadedImageUrl={setUploadedImageUrl}
+                                    setImageLoadingState={setImageLoadingState} 
+                                    imageLoadingState={imageLoadingState}  
+                                    isCustomStyling={true}
+                                    isEditMode={false}
+                                />
+                                <Button
+                                    onClick={handleUploadFeatureImage}
+                                    className="w-full"
+                                    disabled={!uploadedImageUrl || imageLoadingState}
+                                >
+                                    {imageLoadingState ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                                    {imageLoadingState ? "Processing..." : "Add Image to Banner"}
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                    {/* Stat Card: Contact Messages */}
-                    <Card className="stats-card">
-                        <CardHeader className="stats-card-header">
-                            <CardTitle className="stats-card-title">Contact Messages</CardTitle>
-                            <Mail className="stats-card-icon" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="stats-card-value">{stats?.totalContactMessages || 0}</div>
-                        </CardContent>
-                    </Card>
+                    {/* Existing Images List */}
+                    <div>
+                        <h3 className="section-header">Current Banner Images</h3>
+                        {/* Scrollable container for image list */}
+                        <div className="feature-images-list custom-scrollbar">
+                            {featureImageList && featureImageList.length > 0
+                            ? featureImageList.map((featureImgItem) => (
+                                <div key={featureImgItem._id} className="feature-image-container">
+                                    <img
+                                        src={featureImgItem.image}
+                                        className="feature-image"
+                                        alt="Feature banner image"
+                                    />
+                                    {/* Overlay and Delete Button */}
+                                    <div className="feature-image-overlay">
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            className="delete-button"
+                                            onClick={() => handleDeleteFeatureImage(featureImgItem._id)}
+                                            aria-label="Delete image"
+                                        >
+                                            Delete
+                                            <Trash2 className="delete-icon"/>
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))
+                            : <p className="empty-state-message">No feature images uploaded yet.</p>}
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -189,75 +259,6 @@ function AdminDashboard()
                        )}
                     </CardContent>
                  </Card>
-            </section>
-
-            <hr className="section-separator" />
-
-            {/* Section 3: Manage Feature Images */}
-            <section>
-                 <h2 className="section-header">Manage Homepage Banner Images</h2>
-                 <div className="feature-images-grid">
-                    <div>
-                        <Card>
-                             <CardHeader>
-                                <CardTitle className="text-lg">Upload New Image</CardTitle>
-                                <CardDescription>Select or paste an image URL to add to the banner.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ProductImageUpload
-                                     imageFile={imageFile}
-                                     setImageFile={setImageFile}
-                                     uploadedImageUrl={uploadedImageUrl}
-                                     setUploadedImageUrl={setUploadedImageUrl}
-                                     setImageLoadingState={setImageLoadingState} 
-                                     imageLoadingState={imageLoadingState}  
-                                     isCustomStyling={true}
-                                     isEditMode={false}
-                                />
-                                <Button
-                                   onClick={handleUploadFeatureImage}
-                                   className="w-full"
-                                   disabled={!uploadedImageUrl || imageLoadingState}
-                                >
-                                   {imageLoadingState ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
-                                   {imageLoadingState ? "Processing..." : "Add Image to Banner"}
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                     {/* Existing Images List */}
-                     <div>
-                        <h3 className="section-header">Current Banner Images</h3>
-                         {/* Scrollable container for image list */}
-                         <div className="feature-images-list custom-scrollbar">
-                            {featureImageList && featureImageList.length > 0
-                            ? featureImageList.map((featureImgItem) => (
-                                <div key={featureImgItem._id} className="feature-image-container">
-                                    <img
-                                        src={featureImgItem.image}
-                                        className="feature-image"
-                                        alt="Feature banner image"
-                                    />
-                                    {/* Overlay and Delete Button */}
-                                    <div className="feature-image-overlay">
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            className="delete-button"
-                                            onClick={() => handleDeleteFeatureImage(featureImgItem._id)}
-                                            aria-label="Delete image"
-                                        >
-                                            Delete
-                                            <Trash2 className="delete-icon"/>
-                                        </Button>
-                                    </div>
-                                </div>
-                                ))
-                            : <p className="empty-state-message">No feature images uploaded yet.</p>}
-                        </div>
-                     </div>
-                 </div>
             </section>
 
             <hr className="section-separator" />
